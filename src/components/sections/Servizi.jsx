@@ -124,9 +124,12 @@ export default function Servizi() {
               <h3 className="font-serif text-[32px] font-normal text-white mb-4">
                 Guaranteed Yield — The Minimum Guaranteed Income
               </h3>
-              <p className="font-sans font-light text-[18px] text-dark-100 leading-relaxed max-w-2xl">
+              <p className="font-sans font-light text-[18px] text-dark-100 leading-relaxed max-w-2xl mb-3">
                 Per i proprietari che vogliono certezza totale: VirtualBNB garantisce una rendita mensile minima contrattuale.
                 Se superiamo il target, dividiamo il surplus. Zero rischio per te, massimo incentivo per noi.
+              </p>
+              <p className="font-sans text-[11px] uppercase tracking-widest text-gold-500/60 mt-2">
+                *Soggetto ad analisi di fattibilità e approvazione dell'immobile da parte della direzione.
               </p>
             </div>
             <button

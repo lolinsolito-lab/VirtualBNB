@@ -36,10 +36,10 @@ export default function CookieBanner() {
           <p className="font-sans font-light text-[13px] text-dark-100 leading-6 flex-1 min-w-[200px]">
             Utilizziamo cookie tecnici necessari al funzionamento del sito e cookie analitici anonimi per migliorare l'esperienza.{' '}
             <button
-              onClick={() => document.getElementById('contatti')?.scrollIntoView({ behavior: 'smooth' })}
+              onClick={() => window.dispatchEvent(new CustomEvent('open-legal-modal', { detail: 'privacy' }))}
               className="text-gold-500 hover:text-gold-400 transition-colors underline"
             >
-              Privacy Policy
+              Privacy Policy & AI
             </button>
           </p>
           <div className="flex gap-3 flex-shrink-0">

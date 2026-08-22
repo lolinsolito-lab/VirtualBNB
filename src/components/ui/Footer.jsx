@@ -12,17 +12,17 @@ const scrollTo = (id) => document.getElementById(id)?.scrollIntoView({ behavior:
 
 const LEGAL = {
   privacy: {
-    title: 'Privacy Policy',
+    title: 'Privacy Policy & AI',
     content: (
       <>
-        <p>In conformità con il GDPR (UE) 2016/679 e il D.Lgs. 196/2003, i dati personali raccolti sono trattati da VirtualBNB (Insolito Experiences di Michael Jara), con sede in Milano, Italia.</p>
-        <h3 className="font-serif text-[22px] text-white mt-8 mb-2">Dati raccolti</h3>
-        <p>Nome, email, telefono, informazioni sull'immobile fornite volontariamente attraverso i form di contatto.</p>
-        <h3 className="font-serif text-[22px] text-white mt-8 mb-2">Finalità</h3>
-        <p>Rispondere alle richieste di contatto, fornire analisi gratuite, inviare comunicazioni commerciali previo consenso esplicito.</p>
+        <p>In conformità con il GDPR (UE) 2016/679, il D.Lgs. 196/2003 e le linee guida dell'AI Act europeo, i dati personali raccolti sono trattati da VirtualBNB (Insolito Experiences di Michael Jara), con sede legale in Via [Tua Via], Milano, Italia.</p>
+        <h3 className="font-serif text-[22px] text-white mt-8 mb-2">Dati raccolti e Finalità</h3>
+        <p>Raccogliamo nome, email, telefono e informazioni sull'immobile al fine di rispondere alle richieste di contatto, fornire stime di revenue (Analisi Gratuita) e, previo consenso esplicito, per comunicazioni commerciali.</p>
+        <h3 className="font-serif text-[22px] text-white mt-8 mb-2">Uso dell'Intelligenza Artificiale</h3>
+        <p>Per offrire un servizio all'avanguardia, utilizziamo sistemi di Intelligenza Artificiale (inclusi algoritmi di terze parti come OpenAI) per la gestione automatizzata delle tariffe (Dynamic Pricing) e per l'assistenza via chat (AI WhatsApp). I dati inseriti nella chat WhatsApp potrebbero essere elaborati da server esterni unicamente al fine di generare risposte coerenti. Non usiamo i tuoi dati sensibili per addestrare modelli pubblici.</p>
         <h3 className="font-serif text-[22px] text-white mt-8 mb-2">I tuoi diritti</h3>
-        <p>Hai diritto di accesso, rettifica, e cancellazione dei tuoi dati. Scrivi a <a href="mailto:contatti@virtualbnb.it" className="text-gold-500 border-b border-gold-500/30">contatti@virtualbnb.it</a> per far valere i tuoi diritti.</p>
-        <p className="font-mono text-[12px] text-dark-200 mt-10 pt-6 border-t border-gold-500/15">Insolito Experiences · P.IVA IT14379200968 · Aggiornato Aprile 2026</p>
+        <p>Hai diritto di accesso, rettifica e cancellazione dei dati (Diritto all'Oblio). Scrivi alla nostra PEC o all'indirizzo <a href="mailto:contatti@virtualbnb.it" className="text-gold-500 border-b border-gold-500/30">contatti@virtualbnb.it</a> per far valere i tuoi diritti.</p>
+        <p className="font-mono text-[12px] text-dark-200 mt-10 pt-6 border-t border-gold-500/15">Insolito Experiences · P.IVA IT14379200968 · REA: [Il tuo REA]</p>
       </>
     ),
   },
@@ -31,13 +31,13 @@ const LEGAL = {
     content: (
       <>
         <p>Le presenti Condizioni Generali regolano l'accesso e l'utilizzo del sito web VirtualBNB.it, gestito da Insolito Experiences.</p>
-        <h3 className="font-serif text-[22px] text-white mt-8 mb-2">1. Natura dei Servizi</h3>
-        <p>VirtualBNB fornisce servizi di Property Management avanzato e consulenza per affitti brevi. Le simulazioni e le proiezioni di revenue mostrate sul sito ("Analisi Gratuita") sono stime basate sull'analisi algoritmica del mercato locale e non costituiscono garanzia assoluta di rendimento futuro.</p>
-        <h3 className="font-serif text-[22px] text-white mt-8 mb-2">2. Contrattualistica</h3>
-        <p>L'effettiva presa in gestione di un immobile è soggetta alla firma di un formale contratto di Property Management, nel quale verranno definiti nel dettaglio le fee (25% o 28%), gli obblighi normativi e i servizi erogati.</p>
+        <h3 className="font-serif text-[22px] text-white mt-8 mb-2">1. Natura dei Servizi e Simulazioni AI</h3>
+        <p>VirtualBNB fornisce servizi di Property Management avanzato. Le proiezioni di revenue mostrate sul sito ("Analisi Gratuita") sono stime basate sull'analisi algoritmica del mercato. Sebbene altamente precise, non costituiscono in alcun modo una garanzia contrattuale di rendimento futuro, salvo dove esplicitamente indicato dal contratto "Guaranteed Yield".</p>
+        <h3 className="font-serif text-[22px] text-white mt-8 mb-2">2. Contrattualistica e "Guaranteed Yield"</h3>
+        <p>L'effettiva presa in gestione di un immobile e l'eventuale erogazione della "Rendita Garantita" (Guaranteed Yield) sono subordinate a un'insindacabile analisi di fattibilità da parte della direzione e alla successiva firma di un formale contratto di Property Management.</p>
         <h3 className="font-serif text-[22px] text-white mt-8 mb-2">3. Proprietà Intellettuale</h3>
-        <p>I contenuti del sito, il marchio, il logo e l'algoritmo visivo sono di proprietà intellettuale di Michael Jara / Insolito Experiences. È severamente vietata la riproduzione, anche parziale, senza autorizzazione esplicita.</p>
-        <p className="font-mono text-[12px] text-dark-200 mt-10 pt-6 border-t border-gold-500/15">Insolito Experiences · P.IVA IT14379200968 · Aggiornato Aprile 2026</p>
+        <p>I contenuti del sito, il marchio, il logo e le interfacce visive sono di esclusiva proprietà intellettuale di Michael Jara / Insolito Experiences. È severamente vietata la riproduzione, anche parziale.</p>
+        <p className="font-mono text-[12px] text-dark-200 mt-10 pt-6 border-t border-gold-500/15">Insolito Experiences · P.IVA IT14379200968 · REA: [Il tuo REA]</p>
       </>
     ),
   },
@@ -45,14 +45,14 @@ const LEGAL = {
     title: 'Cookie Policy',
     content: (
       <>
-        <p>Questo sito fa uso di cookie tecnici necessari e di tracciamento di terze parti per offrire un'esperienza di navigazione fluida e analizzare in modo anonimo le visite, al fine di migliorare il nostro servizio.</p>
+        <p>Questo sito fa uso di cookie tecnici strettamente necessari e di tracciamento di terze parti per analizzare in modo anonimo le visite e migliorare il servizio.</p>
         <h3 className="font-serif text-[22px] text-white mt-8 mb-2">Cookie Tecnici</h3>
-        <p>Necessari per il funzionamento basilare del sito (ad esempio, per ricordare se hai già chiuso o visualizzato la schermata di introduzione iniziale "Splash Screen"). Non richiedono consenso profilato.</p>
-        <h3 className="font-serif text-[22px] text-white mt-8 mb-2">Cookie Analitici</h3>
-        <p>Utilizziamo strumenti di profilazione leggera (ad esempio Google Analytics o Meta Pixel) solo per capire come i nostri visitatori interagiscono con la piattaforma, al fine di migliorare l'interfaccia utente. Le informazioni raccolte sono in forma aggregata.</p>
+        <p>Necessari per il funzionamento basilare del sito (es. per ricordare le tue preferenze sulla privacy stessa). Non richiedono consenso preventivo.</p>
+        <h3 className="font-serif text-[22px] text-white mt-8 mb-2">Cookie Analitici e di Profilazione</h3>
+        <p>Previo tuo esplicito consenso, utilizziamo strumenti (es. Meta Pixel o Google Analytics) per comprendere le interazioni con la piattaforma. I dati raccolti aiutano a ottimizzare l'interfaccia e mostrare comunicazioni pertinenti.</p>
         <h3 className="font-serif text-[22px] text-white mt-8 mb-2">Disattivazione</h3>
-        <p>Puoi gestire le tue preferenze sui cookie o disattivarli interamente dalle impostazioni del tuo browser web. Tieni presente che disattivare i cookie tecnici potrebbe compromettere la navigazione del sito.</p>
-        <p className="font-mono text-[12px] text-dark-200 mt-10 pt-6 border-t border-gold-500/15">Insolito Experiences · P.IVA IT14379200968 · Aggiornato Aprile 2026</p>
+        <p>Puoi ritirare il consenso in qualsiasi momento o gestire le tue preferenze direttamente dalle impostazioni del tuo browser web.</p>
+        <p className="font-mono text-[12px] text-dark-200 mt-10 pt-6 border-t border-gold-500/15">Insolito Experiences · P.IVA IT14379200968 · REA: [Il tuo REA]</p>
       </>
     ),
   },
@@ -60,6 +60,13 @@ const LEGAL = {
 
 export default function Footer() {
   const [modal, setModal] = useState(null)
+
+  // Ascolta eventi esterni per aprire il modal (es. dal CookieBanner)
+  useEffect(() => {
+    const handleOpenModal = (e) => setModal(e.detail)
+    window.addEventListener('open-legal-modal', handleOpenModal)
+    return () => window.removeEventListener('open-legal-modal', handleOpenModal)
+  }, [])
 
   // Blocca lo scroll del body quando un modal è aperto
   useEffect(() => {
@@ -113,8 +120,9 @@ export default function Footer() {
 
           {/* Legal info */}
           <div className="font-sans text-[13px] text-dark-200 leading-relaxed text-left md:text-right w-full md:w-auto">
-            © 2026 VirtualBNB · P.IVA IT14379200968<br />
-            Sede Legale: Milano, Italia
+            © 2026 VirtualBNB by Insolito Experiences<br />
+            P.IVA IT14379200968 · REA: MI-[TuoNumeroREA] <br />
+            PEC: virtualbnb@pec.it · Milano, Italia
           </div>
         </div>
       </footer>
