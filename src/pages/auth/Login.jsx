@@ -1,7 +1,45 @@
-import { Link } from 'react-router-dom'
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import { supabase } from '../../lib/supabaseClient'
 
 export default function Login() {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const navigate = useNavigate()
+
+  const handleLogin = async (e) => {
+    e.preventDefault()
+    setLoading(true)
+    setError(null)
+
+    const { data, error: authError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
+
+    if (authError) {
+      setError('Credenziali non valide. Riprova.')
+      setLoading(false)
+      return
+    }
+
+    // Check user role
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', data.user.id)
+      .single()
+
+    if (profile?.role === 'admin') {
+      navigate('/admin')
+    } else {
+      navigate('/portal')
+    }
+  }
+
   return (
     <div className="min-h-screen bg-dark-900 flex items-center justify-center p-6 relative overflow-hidden">
       {/* Glow */}
@@ -22,11 +60,19 @@ export default function Login() {
           <p className="font-sans text-[13px] text-dark-200 tracking-[0.2em] uppercase">Portal Access</p>
         </div>
 
-        <form className="flex flex-col gap-6" onSubmit={(e) => e.preventDefault()}>
+        <form className="flex flex-col gap-6" onSubmit={handleLogin}>
+          {error && (
+            <div className="bg-red-500/10 border border-red-500/30 text-red-400 p-4 text-[13px] font-sans">
+              {error}
+            </div>
+          )}
+          
           <div>
             <label className="font-sans text-[11px] tracking-[0.15em] uppercase text-gold-500/80 block mb-2">Email</label>
             <input 
               type="email" 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full bg-dark-900 border border-dark-700 focus:border-gold-500 text-white font-sans text-[15px] p-4 outline-none transition-colors"
               placeholder="admin@virtualbnb.it"
               required
@@ -36,35 +82,21 @@ export default function Login() {
             <label className="font-sans text-[11px] tracking-[0.15em] uppercase text-gold-500/80 block mb-2">Password</label>
             <input 
               type="password" 
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               className="w-full bg-dark-900 border border-dark-700 focus:border-gold-500 text-white font-sans text-[15px] p-4 outline-none transition-colors"
               placeholder="••••••••"
               required
             />
           </div>
 
-          <div className="flex justify-between items-center mt-2">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" className="accent-gold-500 cursor-pointer" />
-              <span className="font-sans text-[13px] text-dark-200">Ricordami</span>
-            </label>
-            <button type="button" className="font-sans text-[13px] text-gold-500 hover:text-gold-400 transition-colors">
-              Password dimenticata?
-            </button>
-          </div>
-
-          <Link 
-            to="/admin" 
-            className="mt-4 flex justify-center items-center font-sans text-[13px] font-medium tracking-[0.15em] uppercase bg-gold-500 text-black py-4 hover:bg-gold-400 transition-all duration-300"
+          <button 
+            type="submit"
+            disabled={loading}
+            className="mt-4 flex justify-center items-center font-sans text-[13px] font-medium tracking-[0.15em] uppercase bg-gold-500 text-black py-4 hover:bg-gold-400 transition-all duration-300 disabled:opacity-50"
           >
-            Accedi
-          </Link>
-
-          <Link 
-            to="/portal" 
-            className="flex justify-center items-center font-sans text-[13px] tracking-[0.15em] uppercase border border-dark-600 text-dark-100 py-4 hover:bg-dark-700 transition-all duration-300"
-          >
-            Mock Login (Owner)
-          </Link>
+            {loading ? 'Accesso in corso...' : 'Accedi'}
+          </button>
         </form>
 
         <div className="mt-10 pt-6 border-t border-dark-700 text-center">
