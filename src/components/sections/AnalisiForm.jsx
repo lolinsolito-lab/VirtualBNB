@@ -26,6 +26,8 @@ export default function AnalisiForm() {
       email: form.elements.namedItem('email').value,
       indirizzo: form.elements.namedItem('indirizzo').value,
       tipologia: form.elements.namedItem('tipologia').value,
+      mq: form.elements.namedItem('mq').value,
+      ospiti: form.elements.namedItem('ospiti').value,
       stato: form.elements.namedItem('stato').value,
       telefono: form.elements.namedItem('telefono').value,
       messaggio: form.elements.namedItem('messaggio').value,
@@ -101,20 +103,26 @@ export default function AnalisiForm() {
             >
               {status === 'success' ? (
                 <motion.div
-                  initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                  className="py-12 text-center"
+                  initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+                  className="py-12 flex flex-col items-center text-center"
                 >
-                  <p className="font-mono text-[14px] text-green-400 mb-4">✓ Richiesta inviata</p>
-                  <p className="font-sans font-light text-[18px] text-dark-100 leading-relaxed">
-                    Ti contatteremo entro 24 ore.{' '}
-                    <a
-                      href="https://wa.me/393393522164"
-                      target="_blank" rel="noopener noreferrer"
-                      className="text-gold-400 border-b border-gold-400/30"
-                    >
-                      WhatsApp →
-                    </a>
+                  <div className="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mb-6">
+                    <svg className="w-10 h-10 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <h3 className="font-serif text-[32px] text-white mb-4">Richiesta inviata</h3>
+                  <p className="font-sans font-light text-[18px] text-dark-100 leading-relaxed mb-10 max-w-sm">
+                    Il nostro team sta analizzando i dati del tuo immobile. Ti contatteremo entro 24 ore lavorative.
                   </p>
+                  <a
+                    href="https://wa.me/393393522164"
+                    target="_blank" rel="noopener noreferrer"
+                    className="font-sans text-[13px] font-medium tracking-[0.15em] uppercase text-black bg-gold-500 px-8 py-5 hover:bg-white hover:scale-105 transition-all duration-300 w-full md:w-auto"
+                    style={{ boxShadow: '0 4px 20px rgba(184,150,62,0.3)' }}
+                  >
+                    Scrivici su WhatsApp ora
+                  </a>
                 </motion.div>
               ) : (
                 <form className="flex flex-col gap-8" onSubmit={handleSubmit}>
@@ -139,7 +147,7 @@ export default function AnalisiForm() {
                       <label className={labelClass}>Tipologia</label>
                       <select name="tipologia" className={inputClass} style={{ appearance: 'none', cursor: 'pointer' }} required defaultValue="">
                         <option value="" disabled>Seleziona</option>
-                        {['Monolocale', 'Bilocale', 'Trilocale', 'Quadrilocale o più'].map((o) => (
+                        {['Monolocale', 'Bilocale', 'Trilocale', 'Villa / Casale', 'Altro'].map((o) => (
                           <option key={o} style={{ background: '#111111' }}>{o}</option>
                         ))}
                       </select>
@@ -148,10 +156,21 @@ export default function AnalisiForm() {
                       <label className={labelClass}>Stato attuale</label>
                       <select name="stato" className={inputClass} style={{ appearance: 'none', cursor: 'pointer' }} required defaultValue="">
                         <option value="" disabled>Seleziona</option>
-                        {['Sfitto', 'Già su Airbnb (autonomo)', 'Con altro property manager', 'Affitto tradizionale'].map((o) => (
+                        {['Sfitto / Da arredare', 'Già su Airbnb (autonomo)', 'Con altro property manager', 'Affitto tradizionale'].map((o) => (
                           <option key={o} style={{ background: '#111111' }}>{o}</option>
                         ))}
                       </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-x-10 gap-y-8">
+                    <div>
+                      <label className={labelClass}>Metratura (mq)</label>
+                      <input name="mq" type="number" min="10" className={inputClass} placeholder="es. 65" required />
+                    </div>
+                    <div>
+                      <label className={labelClass}>Ospiti (max)</label>
+                      <input name="ospiti" type="number" min="1" max="20" className={inputClass} placeholder="es. 4" required />
                     </div>
                   </div>
 
@@ -169,26 +188,55 @@ export default function AnalisiForm() {
                     />
                   </div>
 
+                  <div className="flex items-start gap-3 mt-4">
+                    <input 
+                      type="checkbox" 
+                      id="privacy-check" 
+                      name="privacy" 
+                      required 
+                      className="mt-1 cursor-pointer w-4 h-4 accent-gold-500" 
+                    />
+                    <label htmlFor="privacy-check" className="font-sans text-[13px] text-dark-200 leading-relaxed cursor-pointer select-none">
+                      Ho letto e accetto la{' '}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          window.dispatchEvent(new CustomEvent('open-legal-modal', { detail: 'privacy' }));
+                        }}
+                        className="text-gold-500 hover:text-gold-400 transition-colors underline"
+                      >
+                        Privacy Policy
+                      </button>
+                      . Acconsento al trattamento dei dati per ricevere l'analisi gratuita.
+                    </label>
+                  </div>
+
                   <button
                     type="submit"
                     disabled={status === 'loading'}
-                    className="mt-6 font-sans text-[13px] font-medium tracking-[0.15em] uppercase bg-gold-500 text-black py-5 hover:bg-gold-400 transition-all duration-300 disabled:opacity-60"
+                    className="mt-4 flex justify-center items-center font-sans text-[13px] font-medium tracking-[0.15em] uppercase bg-gold-500 text-black py-5 hover:bg-gold-400 transition-all duration-300 disabled:opacity-80 disabled:cursor-not-allowed"
                     style={{ boxShadow: '0 4px 24px rgba(184,150,62,0.3)' }}
                   >
-                    {status === 'loading' ? 'Invio in corso...' : 'Ricevi l\'analisi gratuita →'}
+                    {status === 'loading' ? (
+                      <>
+                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Elaborazione in corso...
+                      </>
+                    ) : (
+                      'Ricevi l\'analisi gratuita →'
+                    )}
                   </button>
 
                   {status === 'error' && (
-                    <p className="font-sans text-[14px] text-red-400 mt-2">
-                      Errore. Scrivi a{' '}
-                      <a href="mailto:contatti@virtualbnb.it" className="text-gold-400">contatti@virtualbnb.it</a>
+                    <p className="font-sans text-[14px] text-red-400 mt-2 bg-red-400/10 border border-red-400/20 p-4">
+                      Si è verificato un errore di connessione. Per favore, scrivici direttamente a{' '}
+                      <a href="mailto:contatti@virtualbnb.it" className="text-gold-400 border-b border-gold-400/30">contatti@virtualbnb.it</a>
                     </p>
                   )}
-
-                  <p className="font-sans text-[13px] text-dark-200 mt-2 flex items-start gap-3">
-                    <span className="w-5 h-px bg-gold-500/30 inline-block flex-shrink-0 mt-2.5" />
-                    Nessun impegno. L'analisi è 100% gratuita e senza vincoli.
-                  </p>
                 </form>
               )}
             </motion.div>
