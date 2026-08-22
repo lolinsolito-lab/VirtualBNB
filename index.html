@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VirtualBNB | Property Management d'Eccellenza Milano</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+
+    <!-- SEO -->
+    <meta name="description" content="Il sistema AI-driven che trasforma il tuo immobile in un asset finanziario. Gestione completa, trasparenza totale, rendita ottimizzata. Milano.">
+    <meta name="keywords" content="property manager Milano, gestione airbnb Milano, affitti brevi Milano, virtualbnb, michael jara, AI revenue management">
+    <meta name="author" content="Michael Jara — VirtualBNB, Insolito Experiences">
+    <meta name="robots" content="index, follow">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.virtualbnb.it/">
+    <meta property="og:title" content="VirtualBNB | Il tuo immobile lavora. Tu no.">
+    <meta property="og:description" content="Sistema di property management AI-driven per il mercato milanese. Revenue ottimizzato, trasparenza totale, zero gestione da parte tua.">
+    <meta property="og:image" content="https://www.virtualbnb.it/og-image.jpg">
+    <meta property="og:locale" content="it_IT">
+    <meta property="og:site_name" content="VirtualBNB">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://www.virtualbnb.it/">
+    <meta property="twitter:title" content="VirtualBNB | Il tuo immobile lavora. Tu no.">
+    <meta property="twitter:description" content="Property management AI-driven per Milano.">
+    <meta property="twitter:image" content="https://www.virtualbnb.it/og-image.jpg">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS — configurato per dark luxury -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        gold: {
+                            50:  '#FBF6E7',
+                            100: '#F4E8C1',
+                            200: '#EDD49B',
+                            300: '#E6C175',
+                            400: '#D4AF6A',
+                            500: '#B8963E',
+                            600: '#8B6914',
+                            700: '#6B4F0F',
+                            900: '#3A2A08',
+                        },
+                        dark: {
+                            50:  '#F0F0F0',
+                            100: '#A0A0A0',
+                            200: '#666666',
+                            300: '#555555',
+                            400: '#444444',
+                            500: '#333333',
+                            700: '#1A1A1A',
+                            800: '#111111',
+                            900: '#0A0A0A',
+                        },
+                        cream: {
+                            50:  '#FDFCF9',
+                            100: '#F7F2EA',
+                            200: '#EFE8D8',
+                            300: '#E4D9C4',
+                        },
+                    },
+                    fontFamily: {
+                        serif: ['"Cormorant Garamond"', 'serif'],
+                        sans:  ['"DM Sans"', 'sans-serif'],
+                        mono:  ['"DM Mono"', 'monospace'],
+                    },
+                    letterSpacing: {
+                        widest: '.25em',
+                    },
+                    boxShadow: {
+                        'luxury':    '0 8px 40px rgba(0,0,0,0.18), 0 2px 12px rgba(0,0,0,0.1)',
+                        'luxury-lg': '0 20px 60px rgba(0,0,0,0.25), 0 4px 20px rgba(0,0,0,0.12)',
+                        'card':      '0 2px 20px rgba(0,0,0,0.07), 0 1px 6px rgba(0,0,0,0.04)',
+                        'card-hover':'0 12px 40px rgba(0,0,0,0.14), 0 4px 12px rgba(0,0,0,0.07)',
+                        'gold':      '0 0 30px rgba(184,150,62,0.15)',
+                    },
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-dark-900 text-white antialiased overflow-x-hidden">
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+</body>
+</html>
