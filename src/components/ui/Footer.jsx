@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const navItems = [
@@ -61,6 +61,18 @@ const LEGAL = {
 export default function Footer() {
   const [modal, setModal] = useState(null)
 
+  // Blocca lo scroll del body quando un modal è aperto
+  useEffect(() => {
+    if (modal) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => { document.body.style.overflow = '' }
+  }, [modal])
+
+  const closeModal = () => setModal(null)
+
   return (
     <>
       <footer className="bg-dark-900 border-t border-gold-500/12">
@@ -112,26 +124,30 @@ export default function Footer() {
         {modal && (
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[200] flex items-center justify-center p-6"
+            className="fixed inset-0 z-[200] flex items-center justify-center p-4 md:p-6"
             style={{ background: 'rgba(0,0,0,0.88)', backdropFilter: 'blur(8px)' }}
-            onClick={() => setModal(null)}
+            onClick={closeModal}
           >
             <motion.div
               initial={{ y: 32, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
               exit={{ y: 32, opacity: 0 }} transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-              className="bg-dark-700 border border-gold-500/15 max-w-3xl w-full max-h-[85vh] overflow-y-auto p-10 md:p-14 relative"
+              className="bg-dark-700 border border-gold-500/15 max-w-3xl w-full max-h-[88vh] overflow-y-auto p-8 md:p-14 relative"
               onClick={(e) => e.stopPropagation()}
             >
+              {/* Close button — grande e touch-friendly */}
               <button
-                onClick={() => setModal(null)}
-                className="absolute top-6 right-6 text-dark-100 hover:text-white transition-colors text-2xl font-light"
+                onClick={closeModal}
+                aria-label="Chiudi"
+                className="absolute top-3 right-3 md:top-6 md:right-6 z-30 w-12 h-12 flex items-center justify-center bg-dark-900/90 border border-white/20 text-white rounded-full hover:bg-gold-500 hover:text-black hover:border-gold-500 transition-all duration-300"
               >
-                ✕
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
               </button>
-              <h2 className="font-serif text-[32px] md:text-[40px] font-light mb-8 text-white">
+              <h2 className="font-serif text-[28px] md:text-[40px] font-light mb-8 text-white pr-10">
                 {LEGAL[modal]?.title}
               </h2>
-              <div className="font-sans font-light text-[17px] md:text-[18px] text-dark-100 leading-relaxed space-y-6">
+              <div className="font-sans font-light text-[16px] md:text-[18px] text-dark-100 leading-relaxed space-y-6">
                 {LEGAL[modal]?.content}
               </div>
             </motion.div>

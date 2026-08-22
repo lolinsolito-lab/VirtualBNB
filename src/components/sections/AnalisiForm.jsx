@@ -81,7 +81,7 @@ export default function AnalisiForm() {
                     initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: i * 0.1, duration: 0.6 }}
-                    className="flex gap-6 items-start py-5 border-b border-white/7"
+                    className="flex gap-6 items-start py-5 border-b border-white/10"
                   >
                     <span className="font-mono text-[12px] text-gold-500 flex-shrink-0 mt-1">{item.num}</span>
                     <p className="font-sans font-light text-[18px] text-dark-100 leading-relaxed">{item.text}</p>

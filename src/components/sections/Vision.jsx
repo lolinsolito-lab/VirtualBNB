@@ -1,10 +1,21 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const APARTMENT_IMAGE = 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=900&q=80'
 const MICHAEL_IMAGE = 'https://www.dropbox.com/scl/fi/qwqs12w3qcvbeycdpyk7p/me.jpg?rlkey=4jmmxxvnrihx4vzutj9jc6ncl&st=sjkmvmel&raw=1'
 
 const scrollTo = (id) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
+
+function useModalLock(open) {
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => { document.body.style.overflow = '' }
+  }, [open])
+}
 
 const principles = [
   {
@@ -32,6 +43,10 @@ const principles = [
 export default function Vision() {
   const [modalOpen, setModalOpen] = useState(false)
   const [activeP, setActiveP] = useState(null)
+
+  useModalLock(modalOpen)
+
+  const closeModal = () => setModalOpen(false)
 
   return (
     <>
@@ -216,7 +231,7 @@ export default function Vision() {
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 z-[200] flex items-center justify-center p-4 md:p-8"
             style={{ background: 'rgba(10,10,10,0.95)', backdropFilter: 'blur(15px)' }}
-            onClick={() => setModalOpen(false)}
+            onClick={closeModal}
           >
             <motion.div
               initial={{ y: 40, opacity: 0, scale: 0.95 }}
@@ -224,15 +239,16 @@ export default function Vision() {
               exit={{ y: 30, opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-5xl bg-dark-900 border border-gold-500/20 shadow-[-20px_20px_80px_rgba(0,0,0,0.8)] flex flex-col md:flex-row relative cursor-auto"
+              className="w-full max-w-5xl bg-dark-900 border border-gold-500/20 shadow-[-20px_20px_80px_rgba(0,0,0,0.8)] flex flex-col md:flex-row relative cursor-auto max-h-[90vh] overflow-hidden"
             >
-              {/* Close button */}
+              {/* Close button — grande e touch-friendly */}
               <button
-                onClick={() => setModalOpen(false)}
-                className="absolute top-4 right-4 md:top-6 md:right-6 z-20 w-12 h-12 flex items-center justify-center bg-dark-800 border border-white/10 hover:bg-gold-500 hover:text-black hover:border-gold-500 text-white rounded-full transition-all duration-300"
+                onClick={closeModal}
+                aria-label="Chiudi"
+                className="absolute top-3 right-3 z-30 w-12 h-12 flex items-center justify-center bg-dark-900/90 border border-white/20 hover:bg-gold-500 hover:text-black hover:border-gold-500 text-white rounded-full transition-all duration-300 md:top-6 md:right-6"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
 

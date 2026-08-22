@@ -113,7 +113,7 @@ export default function Hero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.8 }}
-            className="flex gap-4 border-t border-white/12 pt-10 max-w-3xl flex-wrap"
+            className="flex gap-4 border-t border-white/10 pt-10 max-w-3xl flex-wrap"
           >
             {metrics.map((m, i) => (
               <motion.div
