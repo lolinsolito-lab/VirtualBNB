@@ -1,12 +1,17 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Euro, Calendar, CheckCircle, AlertCircle } from 'lucide-react'
+import { Euro, Calendar, CheckCircle, AlertCircle, Eye, ArrowLeft } from 'lucide-react'
 import { supabase } from '../../lib/supabaseClient'
+import { useSearchParams, Link } from 'react-router-dom'
 
 export default function OwnerDashboard() {
   const [property, setProperty] = useState(null)
   const [report, setReport] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [searchParams] = useSearchParams()
+  const previewOwnerId = searchParams.get('preview')
+  const [isPreview, setIsPreview] = useState(false)
+  const [ownerName, setOwnerName] = useState('')
 
   useEffect(() => {
     async function loadData() {
@@ -16,11 +21,37 @@ export default function OwnerDashboard() {
         return
       }
 
-      // Fetch the owner's property
+      // Identify target user ID (Impersonation check)
+      let targetUserId = authData.user.id
+
+      if (previewOwnerId) {
+        // Verify current user is Admin before allowing impersonation
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', authData.user.id)
+          .single()
+
+        if (profile?.role === 'admin') {
+          targetUserId = previewOwnerId
+          setIsPreview(true)
+          
+          // Get the impersonated owner's name
+          const { data: targetProfile } = await supabase
+            .from('profiles')
+            .select('full_name')
+            .eq('id', previewOwnerId)
+            .single()
+            
+          if (targetProfile) setOwnerName(targetProfile.full_name)
+        }
+      }
+
+      // Fetch the target owner's property
       const { data: propData } = await supabase
         .from('properties')
         .select('*')
-        .eq('owner_id', authData.user.id)
+        .eq('owner_id', targetUserId)
         .limit(1)
         .single()
 
@@ -43,24 +74,45 @@ export default function OwnerDashboard() {
     }
 
     loadData()
-  }, [])
+  }, [previewOwnerId])
 
   if (loading) return <div className="p-10 text-white font-sans">Caricamento dati dal database...</div>
 
   if (!property) {
     return (
       <div className="max-w-5xl mx-auto p-10 bg-dark-800 border border-dark-700 rounded-lg text-center">
+        {isPreview && (
+          <div className="mb-6 inline-flex items-center gap-2 bg-gold-500/20 text-gold-500 px-4 py-2 rounded-full font-sans text-[12px] uppercase tracking-wider">
+            <Eye size={14} /> Modalità Anteprima: {ownerName}
+          </div>
+        )}
         <AlertCircle size={48} className="text-gold-500 mx-auto mb-4" />
         <h2 className="font-serif text-[24px] text-white mb-2">Nessun immobile assegnato</h2>
-        <p className="font-sans text-[15px] text-dark-200">
-          Il tuo account è attivo, ma l'amministrazione non ha ancora collegato un immobile al tuo profilo.
+        <p className="font-sans text-[15px] text-dark-200 mb-6">
+          L'amministrazione non ha ancora collegato un immobile a questo profilo.
         </p>
+        {isPreview && (
+          <Link to="/admin" className="inline-flex items-center gap-2 font-sans text-[13px] text-white bg-dark-700 px-4 py-2 hover:bg-dark-600 transition-colors rounded">
+            <ArrowLeft size={16} /> Torna al CRM
+          </Link>
+        )}
       </div>
     )
   }
 
   return (
     <div className="max-w-5xl mx-auto">
+      {isPreview && (
+        <div className="bg-gold-500 text-black px-4 py-3 rounded-lg mb-6 flex justify-between items-center">
+          <div className="flex items-center gap-2 font-sans text-[13px] font-medium uppercase tracking-wider">
+            <Eye size={16} /> Modalità Anteprima: stai visualizzando come {ownerName}
+          </div>
+          <Link to="/admin" className="font-sans text-[12px] bg-black text-white px-4 py-1.5 hover:bg-dark-800 transition-colors">
+            Chiudi Anteprima
+          </Link>
+        </div>
+      )}
+
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
         <h1 className="font-serif text-[32px] font-light text-white mb-2">{property.title}</h1>
         <p className="font-sans text-[15px] text-dark-200 mb-10">{property.address} — {property.type}</p>
@@ -85,21 +137,21 @@ export default function OwnerDashboard() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
-          {/* Calendar Mock (Remains visual for now until integration) */}
+          {/* Calendar Real Occupancy */}
           <div className="bg-dark-800 border border-dark-700 p-8 rounded-lg">
             <div className="flex items-center gap-3 mb-6">
               <Calendar className="text-gold-500" size={24} />
               <h3 className="font-serif text-[20px] text-white">Occupazione</h3>
             </div>
             <div className="flex items-end justify-between mb-2">
-              <span className="font-serif text-[32px] text-white">--%</span>
-              <span className="font-sans text-[14px] text-dark-200 mb-2">Dati in sincronizzazione...</span>
+              <span className="font-serif text-[32px] text-white">{report ? report.occupancy_rate : '--'}%</span>
+              <span className="font-sans text-[14px] text-dark-200 mb-2">{report ? `Rendiconto ${report.month_year}` : 'Nessun dato'}</span>
             </div>
             <div className="w-full bg-dark-900 h-2 rounded-full overflow-hidden">
-              <div className="bg-gold-500 h-full w-[0%]" />
+              <div className="bg-gold-500 h-full transition-all duration-1000" style={{ width: `${report ? report.occupancy_rate : 0}%` }} />
             </div>
             <p className="font-sans text-[13px] text-dark-200 mt-6">
-              Integrazione PMS Lodgify in arrivo.
+              Dato aggiornato calcolato sulle notti prenotate e bloccate per questo mese.
             </p>
           </div>
 

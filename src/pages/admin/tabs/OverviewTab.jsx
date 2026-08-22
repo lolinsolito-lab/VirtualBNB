@@ -4,7 +4,7 @@ import { TrendingUp, Users, Home, Euro } from 'lucide-react'
 import { supabase } from '../../../lib/supabaseClient'
 
 export default function OverviewTab() {
-  const [stats, setStats] = useState({ revenue: 0, properties: 0, owners: 0 })
+  const [stats, setStats] = useState({ revenue: 0, properties: 0, owners: 0, avgOccupancy: 0 })
   const [leads, setLeads] = useState([])
   const [loading, setLoading] = useState(true)
 
@@ -21,17 +21,24 @@ export default function OverviewTab() {
         .from('properties')
         .select('*', { count: 'exact', head: true })
 
-      // Sum revenue
+      // Sum revenue and calculate avg occupancy
       const { data: reports } = await supabase
         .from('monthly_reports')
-        .select('gross_revenue')
+        .select('gross_revenue, occupancy_rate')
       
       const totalRev = reports?.reduce((acc, curr) => acc + Number(curr.gross_revenue), 0) || 0
+      
+      let avgOcc = 0
+      if (reports && reports.length > 0) {
+        const totalOcc = reports.reduce((acc, curr) => acc + (curr.occupancy_rate || 0), 0)
+        avgOcc = Math.round(totalOcc / reports.length)
+      }
 
       setStats({
         revenue: totalRev,
         properties: propsCount || 0,
-        owners: ownersCount || 0
+        owners: ownersCount || 0,
+        avgOccupancy: avgOcc
       })
 
       // Fetch leads
@@ -54,7 +61,7 @@ export default function OverviewTab() {
     { label: 'Fatturato Registrato (Totale)', value: `€${stats.revenue.toLocaleString('it-IT')}`, icon: <Euro size={24} /> },
     { label: 'Proprietà Attive', value: stats.properties.toString(), icon: <Home size={24} /> },
     { label: 'Proprietari (Clienti)', value: stats.owners.toString(), icon: <Users size={24} /> },
-    { label: 'RevPAR Medio', value: 'N/A', icon: <TrendingUp size={24} /> },
+    { label: 'Occupazione Media', value: `${stats.avgOccupancy}%`, icon: <TrendingUp size={24} /> },
   ]
 
   return (

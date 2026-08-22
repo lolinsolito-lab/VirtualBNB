@@ -136,6 +136,12 @@ export default function UsersTab() {
                       <td className="p-4">{u.full_name}</td>
                       <td className="p-4 text-dark-200">{new Date(u.created_at).toLocaleDateString('it-IT')}</td>
                       <td className="p-4 text-right">
+                        <a 
+                          href={`/portal?preview=${u.id}`} 
+                          className="text-[12px] text-gold-500 hover:text-gold-400 uppercase tracking-widest font-mono mr-4"
+                        >
+                          Vedi Dashboard
+                        </a>
                         <button className="text-[12px] text-red-400 hover:text-red-300 uppercase tracking-widest font-mono">
                           Sospendi
                         </button>

@@ -12,6 +12,7 @@ export default function FinancesTab() {
   const [grossRev, setGrossRev] = useState('')
   const [cleaning, setCleaning] = useState('')
   const [fees, setFees] = useState('')
+  const [occupancy, setOccupancy] = useState('')
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState(null)
 
@@ -44,8 +45,6 @@ export default function FinancesTab() {
     setSaving(true)
     setMessage(null)
 
-    // Calculate automatically via SQL (net_payout = gross_revenue - virtualbnb_fees)
-    // We just need to insert gross, cleaning, and fees
     const { error } = await supabase
       .from('monthly_reports')
       .upsert([
@@ -55,6 +54,7 @@ export default function FinancesTab() {
           gross_revenue: parseFloat(grossRev),
           cleaning_fees: parseFloat(cleaning),
           virtualbnb_fees: parseFloat(fees),
+          occupancy_rate: parseInt(occupancy),
           status: 'pending'
         }
       ], { onConflict: 'property_id,month_year' })
@@ -66,6 +66,7 @@ export default function FinancesTab() {
       setGrossRev('')
       setCleaning('')
       setFees('')
+      setOccupancy('')
     }
     setSaving(false)
   }
@@ -73,7 +74,7 @@ export default function FinancesTab() {
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
       
-      <div className="bg-dark-800 border border-dark-700 p-8 rounded-lg mb-10 max-w-3xl">
+      <div className="bg-dark-800 border border-dark-700 p-8 rounded-lg mb-10 max-w-4xl">
         <h2 className="font-serif text-[24px] text-white mb-2">Genera Rendiconto Mensile</h2>
         <p className="font-sans text-[13px] text-dark-200 mb-8">
           I dati inseriti qui appariranno in tempo reale sulla Dashboard del proprietario dell'immobile.
@@ -112,7 +113,7 @@ export default function FinancesTab() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t border-dark-700">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 pt-4 border-t border-dark-700">
               <div>
                 <label className="font-sans text-[11px] tracking-[0.15em] uppercase text-gold-500/80 block mb-2">Ricavi Lordi (€)</label>
                 <input 
@@ -143,6 +144,20 @@ export default function FinancesTab() {
                   value={fees}
                   onChange={(e) => setFees(e.target.value)}
                   className="w-full bg-dark-900 border border-dark-700 focus:border-gold-500 text-white font-sans text-[14px] p-3 outline-none"
+                  required
+                />
+              </div>
+              <div>
+                <label className="font-sans text-[11px] tracking-[0.15em] uppercase text-gold-500/80 block mb-2">Occupazione (%)</label>
+                <input 
+                  type="number" 
+                  step="1"
+                  min="0"
+                  max="100"
+                  value={occupancy}
+                  onChange={(e) => setOccupancy(e.target.value)}
+                  className="w-full bg-dark-900 border border-dark-700 focus:border-gold-500 text-white font-sans text-[14px] p-3 outline-none"
+                  placeholder="Es. 85"
                   required
                 />
               </div>
