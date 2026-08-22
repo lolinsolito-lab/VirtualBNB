@@ -99,6 +99,11 @@ export default function Corporate() {
           >
             Per le aziende che<br />
             <em className="italic text-gold-400">viaggiano e si espandono.</em>
+            <span className="block mt-8">
+              <span className="font-sans text-[11px] font-medium tracking-[0.25em] uppercase bg-gold-500 text-black px-5 py-2.5 inline-block">
+                In Arrivo
+              </span>
+            </span>
           </motion.h2>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 items-start relative">

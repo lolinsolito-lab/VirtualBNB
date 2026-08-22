@@ -34,10 +34,10 @@ const features = [
     badge: 'Rating medio 4.9 ★',
   },
   {
-    num: '06', icon: '⬡',
-    title: 'Canale corporate B2B',
-    desc: 'Accordi diretti con aziende per alloggiare team in trasferta. Revenue garantito, contratti mensili. Un canale esclusivo che Airbnb non offre.',
-    badge: 'Esclusivo VirtualBNB',
+    num: '06', icon: 'briefcase',
+    title: 'Canale corporate B2B (In Arrivo)',
+    desc: 'Stiamo sviluppando un circuito privato di aziende per affitti di manager in trasferta a zero commissioni OTA.',
+    badge: 'Coming Soon',
   },
 ]
 
@@ -122,14 +122,13 @@ export default function Servizi() {
             <div>
               <p className="font-mono text-[12px] tracking-[0.2em] uppercase text-gold-500 mb-4">Prodotto premium</p>
               <h3 className="font-serif text-[32px] font-normal text-white mb-4">
-                Guaranteed Yield — The Minimum Guaranteed Income
+                Guaranteed Income — Protezione Flessibile
               </h3>
               <p className="font-sans font-light text-[18px] text-dark-100 leading-relaxed max-w-2xl mb-3">
-                Per i proprietari che vogliono certezza totale: VirtualBNB garantisce una rendita mensile minima contrattuale.
-                Se superiamo il target, dividiamo il surplus. Zero rischio per te, massimo incentivo per noi.
+                Un sistema a garanzia variabile simile a un'assicurazione: la protezione dell'incasso si attiva solo quando l'immobile è occupato e si mette in pausa quando è vuoto. Abbattiamo i costi fissi e massimizziamo le tue entrate nette in totale sicurezza.
               </p>
               <p className="font-sans text-[11px] uppercase tracking-widest text-gold-500/60 mt-2">
-                *Soggetto ad analisi di fattibilità e approvazione dell'immobile da parte della direzione.
+                *Opzione Premium soggetta ad analisi e valutazione del potenziale dell'immobile.
               </p>
             </div>
             <button

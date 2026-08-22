@@ -17,7 +17,7 @@ const comparisons = [
   {
     title: 'Contratti & Rischio',
     competitor: 'Gestione standard o affitto lungo 4+4. In caso di morosità, l\'iter legale dura mesi ed è a tue spese.',
-    us: 'Opzione Guaranteed Yield: concordiamo una rendita fissa, e il rischio di sfitto ce lo assumiamo noi. Entrata garantita.',
+    us: 'Opzione Guaranteed Income: garanzia flessibile attivabile sui periodi di occupazione per azzerare i rischi senza i pesanti costi fissi di un vuoto-pieno standard.',
   },
   {
     title: 'Reportistica & Dati',
@@ -27,7 +27,7 @@ const comparisons = [
   {
     title: 'Canali di Vendita',
     competitor: 'Il tuo appartamento è visibile quasi esclusivamente su Airbnb, subendo le bizze del loro algoritmo.',
-    us: 'Multi-OTA Premium (Booking, VRBO, etc.) e, soprattutto, un network B2B diretto per aziende a zero commissioni esterne.',
+    us: 'Multi-OTA Premium (Booking, VRBO, etc.) con integrazione in arrivo del nostro network B2B diretto per aziende a zero commissioni esterne.',
   },
   {
     title: 'Cura & Manutenzione',
