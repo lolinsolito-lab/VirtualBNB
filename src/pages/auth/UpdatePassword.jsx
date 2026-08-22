@@ -1,42 +1,53 @@
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { supabase } from '../../lib/supabaseClient'
 
-export default function Login() {
-  const [email, setEmail] = useState('')
+export default function UpdatePassword() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const navigate = useNavigate()
 
-  const handleLogin = async (e) => {
+  useEffect(() => {
+    // Check if user is actually in a recovery session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        navigate('/login')
+      }
+    })
+  }, [navigate])
+
+  const handleUpdate = async (e) => {
     e.preventDefault()
     setLoading(true)
     setError(null)
 
-    const { data, error: authError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
+    const { error: updateError } = await supabase.auth.updateUser({
+      password: password
     })
 
-    if (authError) {
-      setError('Credenziali non valide. Riprova.')
+    if (updateError) {
+      setError("Impossibile aggiornare la password. Il link potrebbe essere scaduto.")
       setLoading(false)
-      return
-    }
-
-    // Check user role
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', data.user.id)
-      .single()
-
-    if (profile?.role === 'admin') {
-      navigate('/admin')
     } else {
-      navigate('/portal')
+      // Password updated successfully, navigate to portal/admin based on role
+      const { data: authData } = await supabase.auth.getUser()
+      if (authData?.user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', authData.user.id)
+          .single()
+
+        if (profile?.role === 'admin') {
+          navigate('/admin')
+        } else {
+          navigate('/portal')
+        }
+      } else {
+        navigate('/login')
+      }
     }
   }
 
@@ -57,10 +68,10 @@ export default function Login() {
           <div className="font-serif text-[24px] tracking-widest mb-2">
             VIRTUAL<span className="text-gold-500">BNB</span>
           </div>
-          <p className="font-sans text-[13px] text-dark-200 tracking-[0.2em] uppercase">Portal Access</p>
+          <p className="font-sans text-[13px] text-dark-200 tracking-[0.2em] uppercase">Crea nuova password</p>
         </div>
 
-        <form className="flex flex-col gap-6" onSubmit={handleLogin}>
+        <form className="flex flex-col gap-6" onSubmit={handleUpdate}>
           {error && (
             <div className="bg-red-500/10 border border-red-500/30 text-red-400 p-4 text-[13px] font-sans">
               {error}
@@ -68,18 +79,7 @@ export default function Login() {
           )}
           
           <div>
-            <label className="font-sans text-[11px] tracking-[0.15em] uppercase text-gold-500/80 block mb-2">Email</label>
-            <input 
-              type="email" 
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-dark-900 border border-dark-700 focus:border-gold-500 text-white font-sans text-[15px] p-4 outline-none transition-colors"
-              placeholder="admin@virtualbnb.it"
-              required
-            />
-          </div>
-          <div>
-            <label className="font-sans text-[11px] tracking-[0.15em] uppercase text-gold-500/80 block mb-2">Password</label>
+            <label className="font-sans text-[11px] tracking-[0.15em] uppercase text-gold-500/80 block mb-2">Nuova Password</label>
             <input 
               type="password" 
               value={password}
@@ -87,12 +87,8 @@ export default function Login() {
               className="w-full bg-dark-900 border border-dark-700 focus:border-gold-500 text-white font-sans text-[15px] p-4 outline-none transition-colors"
               placeholder="••••••••"
               required
+              minLength={6}
             />
-            <div className="flex justify-end mt-2">
-              <Link to="/forgot-password" className="font-sans text-[12px] text-gold-500 hover:text-gold-400 transition-colors">
-                Password dimenticata?
-              </Link>
-            </div>
           </div>
 
           <button 
@@ -100,15 +96,9 @@ export default function Login() {
             disabled={loading}
             className="mt-4 flex justify-center items-center font-sans text-[13px] font-medium tracking-[0.15em] uppercase bg-gold-500 text-black py-4 hover:bg-gold-400 transition-all duration-300 disabled:opacity-50"
           >
-            {loading ? 'Accesso in corso...' : 'Accedi'}
+            {loading ? 'Salvataggio...' : 'Salva e Accedi'}
           </button>
         </form>
-
-        <div className="mt-10 pt-6 border-t border-dark-700 text-center">
-          <Link to="/" className="font-sans text-[13px] text-dark-300 hover:text-white transition-colors">
-            ← Torna al sito web
-          </Link>
-        </div>
       </motion.div>
     </div>
   )
