@@ -1,24 +1,60 @@
-import { Outlet, Link, useLocation } from 'react-router-dom'
-import { LayoutDashboard, Users, Home, Settings, LogOut, Menu, X, FileText } from 'lucide-react'
-import { useState } from 'react'
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
+import { LayoutDashboard, Users, Home, Settings, LogOut, Menu, X, FileText, Repeat } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { supabase } from '../lib/supabaseClient'
 
 export default function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [profile, setProfile] = useState(null)
   const location = useLocation()
+  const navigate = useNavigate()
   
-  // Semplice controllo per determinare se siamo in admin o owner (mock)
   const isAdmin = location.pathname.includes('/admin')
   
+  // Real nav items pointing to the new routes
   const navItems = isAdmin ? [
     { icon: <LayoutDashboard size={20} />, label: 'Panoramica', path: '/admin' },
     { icon: <Home size={20} />, label: 'Immobili', path: '/admin/properties' },
     { icon: <Users size={20} />, label: 'Proprietari', path: '/admin/owners' },
+    { icon: <FileText size={20} />, label: 'Rendiconti', path: '/admin/finances' },
     { icon: <Settings size={20} />, label: 'Impostazioni', path: '/admin/settings' },
   ] : [
     { icon: <LayoutDashboard size={20} />, label: 'Le mie proprietà', path: '/portal' },
-    { icon: <FileText size={20} />, label: 'Fatturato & Report', path: '/portal/reports' },
-    { icon: <Settings size={20} />, label: 'Impostazioni Account', path: '/portal/settings' },
   ]
+
+  useEffect(() => {
+    async function loadUser() {
+      const { data: authData } = await supabase.auth.getUser()
+      if (authData?.user) {
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', authData.user.id)
+          .single()
+        
+        if (profileData) {
+          setProfile(profileData)
+        }
+      } else {
+        navigate('/login')
+      }
+    }
+    loadUser()
+  }, [navigate])
+
+  const handleLogout = async (e) => {
+    e.preventDefault()
+    await supabase.auth.signOut()
+    navigate('/')
+  }
+
+  // Get Initials from Full Name
+  const getInitials = (name) => {
+    if (!name) return '?'
+    const parts = name.split(' ')
+    if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase()
+    return name.substring(0, 2).toUpperCase()
+  }
 
   return (
     <div className="min-h-screen bg-dark-900 text-white flex">
@@ -62,13 +98,13 @@ export default function DashboardLayout() {
         </nav>
 
         <div className="p-4 border-t border-dark-700">
-          <Link
-            to="/"
-            className="flex items-center gap-3 px-4 py-3 rounded-lg font-sans text-[14px] text-red-400 hover:bg-red-400/10 transition-colors"
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg font-sans text-[14px] text-red-400 hover:bg-red-400/10 transition-colors"
           >
             <LogOut size={20} />
             Esci
-          </Link>
+          </button>
         </div>
       </aside>
 
@@ -83,15 +119,28 @@ export default function DashboardLayout() {
             <Menu size={24} />
           </button>
           
-          <div className="ml-auto flex items-center gap-4">
-            <div className="text-right hidden sm:block">
-              <p className="font-sans text-[13px] text-white">Bentornato,</p>
-              <p className="font-mono text-[11px] text-gold-500 uppercase tracking-widest">
-                {isAdmin ? 'Michael Jara' : 'Mario Rossi'}
-              </p>
-            </div>
-            <div className="w-10 h-10 rounded-full bg-dark-700 border border-gold-500/30 flex items-center justify-center font-serif text-white">
-              {isAdmin ? 'MJ' : 'MR'}
+          <div className="ml-auto flex items-center gap-6">
+            {/* Admin Switch Toggle */}
+            {profile?.role === 'admin' && (
+              <Link 
+                to={isAdmin ? '/portal' : '/admin'} 
+                className="hidden md:flex items-center gap-2 bg-dark-800 border border-dark-700 px-4 py-2 hover:bg-dark-700 transition-colors rounded-full font-sans text-[12px] uppercase tracking-widest text-gold-500"
+              >
+                <Repeat size={14} /> 
+                {isAdmin ? 'Vista Proprietario' : 'Torna Admin'}
+              </Link>
+            )}
+
+            <div className="flex items-center gap-4 border-l border-dark-700 pl-6">
+              <div className="text-right hidden sm:block">
+                <p className="font-sans text-[13px] text-white">Bentornato,</p>
+                <p className="font-mono text-[11px] text-gold-500 uppercase tracking-widest">
+                  {profile ? profile.full_name : 'Caricamento...'}
+                </p>
+              </div>
+              <div className="w-10 h-10 rounded-full bg-dark-700 border border-gold-500/30 flex items-center justify-center font-serif text-white">
+                {getInitials(profile?.full_name)}
+              </div>
             </div>
           </div>
         </header>
