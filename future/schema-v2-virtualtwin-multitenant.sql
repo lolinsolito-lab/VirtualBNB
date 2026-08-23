@@ -1,3 +1,22 @@
+-- ================================================================
+-- ATTENZIONE: NON ESEGUIRE SU QUESTO PROGETTO SUPABASE
+-- ================================================================
+-- Questo schema è pensato per la fase VirtualTwin multi-tenant,
+-- quando VirtualBNB gestirà property manager di terze parti come clienti SaaS.
+--
+-- NON eseguire su: sjqphxmbwaouqyccxzfa (progetto Supabase attuale VirtualBNB)
+--
+-- Motivo: presuppone account_id nei custom claims del JWT tramite Auth Hook.
+-- Il progetto attuale usa auth.uid() = owner_id come vincolo RLS,
+-- che è più semplice, già verificato e non richiede hook aggiuntivi.
+--
+-- Eseguire SOLO quando:
+--   1. VirtualBNB diventa VirtualTwin e gestisce più tenant
+--   2. È stato creato un NUOVO progetto Supabase separato per VirtualTwin
+--   3. L'Auth Hook per custom claims è stato configurato e testato
+--   4. Il codice dei tool AI è stato aggiornato per usare account_id dal JWT
+-- ================================================================
+
 -- VirtualBNB / VirtualTwin — Estensione multi-tenant
 -- Da eseguire DOPO schema.sql. Aggiunge account_id ovunque serve isolamento,
 -- e attiva Row Level Security come seconda linea di difesa oltre al codice.
@@ -42,7 +61,7 @@ create table if not exists contact_memory (
   id uuid primary key default gen_random_uuid(),
   account_id uuid references accounts(id),
   phone_number text not null,
-  facts jsonb default '{}',                  -- es. {"preferred_checkin": "late", "lingua": "en"}
+  facts jsonb default '{}',
   updated_at timestamptz default now(),
   unique(account_id, phone_number)
 );
@@ -56,19 +75,15 @@ alter table properties add column if not exists escalation_topics text[] default
   '{"sconti","contestazioni","danni","richieste_fuori_standard"}';
 
 -- ============================================================
--- ROW LEVEL SECURITY — seconda linea di difesa oltre al codice applicativo.
--- Anche se un bug nell'handler di un tool dimenticasse di filtrare per account_id,
--- Postgres rifiuta comunque la query. Questo e' l'unico punto che rende
--- l'isolamento multi-tenant davvero affidabile.
+-- ROW LEVEL SECURITY — ATTENZIONE: richiede Auth Hook per account_id nel JWT
+-- auth.jwt() ->> 'account_id' è sempre null senza Auth Hook configurato.
+-- Non creare queste policy su un progetto senza l'hook — bloccano tutto silenziosamente.
 -- ============================================================
 alter table properties enable row level security;
 alter table leads enable row level security;
 alter table conversation_sessions enable row level security;
 alter table contact_memory enable row level security;
 
--- Un client autenticato vede SOLO le righe del proprio account_id.
--- auth.jwt() ->> 'account_id' presuppone che l'account_id sia stato inserito
--- nei custom claims del JWT al login (vedi report, sezione autenticazione).
 create policy client_isolation_properties on properties
   for select using (account_id::text = auth.jwt() ->> 'account_id');
 
@@ -80,7 +95,3 @@ create policy client_isolation_sessions on conversation_sessions
 
 create policy client_isolation_memory on contact_memory
   for select using (account_id::text = auth.jwt() ->> 'account_id');
-
--- Il backend admin usa la service_role key, che bypassa RLS by design —
--- e' l'unico client autorizzato a fare query cross-tenant. Non esporre MAI
--- la service_role key al client agent o al frontend.

@@ -181,7 +181,7 @@ export default function Footer() {
           {/* Legal info */}
           <div className="font-sans text-[13px] text-dark-200 leading-relaxed text-left md:text-right w-full md:w-auto">
             © 2026 VirtualBNB by Insolito Experiences<br />
-            P.IVA IT14379200968 · REA: MI-[TuoNumeroREA] <br />
+            P.IVA IT14379200968 <br />
             PEC: virtualbnb@pec.it · Milano, Italia
           </div>
         </div>
