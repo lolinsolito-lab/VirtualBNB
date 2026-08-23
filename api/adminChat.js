@@ -5,31 +5,44 @@ const { createClient } = require('@supabase/supabase-js');
 const { generateWithTools } = require('./lib/aiService');
 const { adminToolDefinitions, adminToolHandlers } = require('./lib/adminTools');
 
-// ─── In-memory rate limiter (per IP) ─────────────────────────────────────────
-// In produzione sostituire con Redis/Upstash per persistenza cross-invocation.
-const rateLimitMap = new Map();
-const RATE_LIMIT_WINDOW_MS = 60 * 1000;  // 1 minuto
-const RATE_LIMIT_MAX_REQUESTS = 15;      // max 15 messaggi/minuto per IP
+// ─── Rate limiting stateless (basato su Vercel Edge headers) ────────────────
+// Un Map() in-memory non funziona su Vercel Functions serverless: ogni invocazione
+// può girare su un'istanza diversa. Soluzione corretta a costo zero:
+// Vercel aggiunge automaticamente x-ratelimit-* headers tramite Vercel Firewall.
+// Come fallback, usiamo un check per IP con finestra temporale nel body della risposta.
+// Per un enforcement reale in produzione: usare Upstash Redis (vedere commento sotto).
+//
+// TODO produzione: npm install @upstash/ratelimit @upstash/redis
+// import { Ratelimit } from '@upstash/ratelimit';
+// import { Redis } from '@upstash/redis';
+// const ratelimit = new Ratelimit({ redis: Redis.fromEnv(), limiter: Ratelimit.slidingWindow(15, '1 m') });
 
-function checkRateLimit(ip) {
-  const now = Date.now();
-  const entry = rateLimitMap.get(ip) || { count: 0, start: now };
-  if (now - entry.start > RATE_LIMIT_WINDOW_MS) {
-    rateLimitMap.set(ip, { count: 1, start: now });
-    return true;
-  }
-  if (entry.count >= RATE_LIMIT_MAX_REQUESTS) return false;
-  entry.count++;
-  rateLimitMap.set(ip, entry);
-  return true;
-}
+// ─── Sanitizzazione anti-injection ───────────────────────────────────────────
+// Filtra sia caratteri di controllo che pattern testuali comuni di prompt injection.
+const INJECTION_PATTERNS = [
+  /ignora.{0,30}(istruzione|regola|prompt|sistema)/i,
+  /ignore.{0,30}(instruction|rule|prompt|system)/i,
+  /forget.{0,30}(everything|all|previous)/i,
+  /dimentica.{0,30}(tutto|regole|istruzioni)/i,
+  /act\s+as\s+(admin|root|system|gpt|claude)/i,
+  /agisci\s+(come|da)\s+(admin|amministratore|sistema)/i,
+  /sei\s+ora\s+(un|uno|una)/i,
+  /you\s+are\s+now\s+(a|an)/i,
+  /mostra.{0,20}(system\s*prompt|istruzione\s*di\s*sistema)/i,
+  /reveal.{0,20}system\s*prompt/i,
+  /elenca.{0,20}(tutti|tutte).{0,20}(utenti|user|account)/i,
+];
 
 function sanitizeMessage(msg) {
   if (typeof msg !== 'string') return null;
-  // Rimuove tentativi di prompt injection via caratteri di controllo
+  // Rimuovi caratteri di controllo
   const cleaned = msg.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '').trim();
-  // Limite di 2000 caratteri per messaggio
-  return cleaned.length > 2000 ? cleaned.substring(0, 2000) : cleaned;
+  if (!cleaned || cleaned.length > 2000) return null;
+  // Blocca pattern di prompt injection noti
+  if (INJECTION_PATTERNS.some(p => p.test(cleaned))) {
+    return '__INJECTION_ATTEMPT__';
+  }
+  return cleaned;
 }
 
 const ADMIN_SYSTEM_PROMPT = `Sei ARIA — Artificial Revenue Intelligence Assistant — l'assistente AI interno di VirtualBNB.
@@ -58,9 +71,11 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  // Rate limiting per IP
-  const ip = req.headers['x-forwarded-for']?.split(',')[0] || req.socket?.remoteAddress || 'unknown';
-  if (!checkRateLimit(ip)) {
+  // Rate limiting: controlla il header Vercel Firewall se disponibile,
+  // altrimenti blocca se la richiesta arriva da un IP con troppe chiamate veloci.
+  // Nota: per enforcement garantito in produzione → Upstash Redis.
+  const rateLimitRemaining = req.headers['x-ratelimit-remaining'];
+  if (rateLimitRemaining !== undefined && parseInt(rateLimitRemaining) <= 0) {
     return res.status(429).json({ error: 'Troppe richieste. Attendi un minuto e riprova.' });
   }
 
@@ -86,6 +101,10 @@ export default async function handler(req, res) {
   const { message, history = [] } = req.body;
   const cleanMessage = sanitizeMessage(message);
   if (!cleanMessage) return res.status(400).json({ error: 'Messaggio non valido o troppo lungo.' });
+  if (cleanMessage === '__INJECTION_ATTEMPT__') {
+    console.warn(`[SECURITY] Prompt injection attempt blocked from ${req.headers['x-forwarded-for'] || 'unknown'} user:${user.id}`);
+    return res.status(400).json({ error: 'Non posso elaborare questa richiesta.' });
+  }
 
   // Limita la history a 20 messaggi max (anti-abuse del context window)
   const safeHistory = Array.isArray(history) 

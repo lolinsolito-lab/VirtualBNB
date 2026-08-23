@@ -6,28 +6,31 @@ const { createClient } = require('@supabase/supabase-js');
 const { generateWithTools } = require('./lib/aiService');
 const { ownerToolDefinitions, ownerToolHandlers } = require('./lib/ownerTools');
 
-// ─── Rate limiter (per IP) ────────────────────────────────────────────────────
-const rateLimitMap = new Map();
-const RATE_LIMIT_WINDOW_MS = 60 * 1000;
-const RATE_LIMIT_MAX_REQUESTS = 20; // owner può fare più domande dell'admin
+// ─── Rate limiting + sanitizzazione ─────────────────────────────────────────
+// Vedi commento in adminChat.js. Map() non è affidabile su serverless.
+// TODO produzione: Upstash Redis per rate limiting persistente cross-invocation.
 
-function checkRateLimit(ip) {
-  const now = Date.now();
-  const entry = rateLimitMap.get(ip) || { count: 0, start: now };
-  if (now - entry.start > RATE_LIMIT_WINDOW_MS) {
-    rateLimitMap.set(ip, { count: 1, start: now });
-    return true;
-  }
-  if (entry.count >= RATE_LIMIT_MAX_REQUESTS) return false;
-  entry.count++;
-  rateLimitMap.set(ip, entry);
-  return true;
-}
+const INJECTION_PATTERNS = [
+  /ignora.{0,30}(istruzione|regola|prompt|sistema)/i,
+  /ignore.{0,30}(instruction|rule|prompt|system)/i,
+  /forget.{0,30}(everything|all|previous)/i,
+  /dimentica.{0,30}(tutto|regole|istruzioni)/i,
+  /act\s+as\s+(admin|root|system|gpt|claude)/i,
+  /agisci\s+(come|da)\s+(admin|amministratore|sistema)/i,
+  /sei\s+ora\s+(un|uno|una)/i,
+  /you\s+are\s+now\s+(a|an)/i,
+  /mostra.{0,20}(system\s*prompt|istruzione\s*di\s*sistema)/i,
+  /reveal.{0,20}system\s*prompt/i,
+  /elenca.{0,20}(tutti|tutte).{0,20}(utenti|user|account)/i,
+  /mostra.{0,30}(altri|altre).{0,30}(propiet|immobil|account)/i,
+];
 
 function sanitizeMessage(msg) {
   if (typeof msg !== 'string') return null;
   const cleaned = msg.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '').trim();
-  return cleaned.length > 2000 ? cleaned.substring(0, 2000) : cleaned;
+  if (!cleaned || cleaned.length > 2000) return null;
+  if (INJECTION_PATTERNS.some(p => p.test(cleaned))) return '__INJECTION_ATTEMPT__';
+  return cleaned;
 }
 
 const OWNER_SYSTEM_PROMPT = `Sei ARIA — l'assistente personale della dashboard VirtualBNB per il proprietario.
@@ -54,9 +57,9 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  // Rate limiting
-  const ip = req.headers['x-forwarded-for']?.split(',')[0] || req.socket?.remoteAddress || 'unknown';
-  if (!checkRateLimit(ip)) {
+  // Rate limiting: controlla header Vercel Firewall
+  const rateLimitRemaining = req.headers['x-ratelimit-remaining'];
+  if (rateLimitRemaining !== undefined && parseInt(rateLimitRemaining) <= 0) {
     return res.status(429).json({ error: 'Troppe richieste. Attendi un minuto e riprova.' });
   }
 
@@ -75,10 +78,14 @@ export default async function handler(req, res) {
   const { data: profile } = await adminDb.from('profiles').select('role').eq('id', user.id).single();
   if (!profile) return res.status(403).json({ error: 'Profilo non trovato.' });
 
-  // Sanitizzazione input
+  // Sanitizzazione input con blocco injection
   const { message, history = [] } = req.body;
   const cleanMessage = sanitizeMessage(message);
   if (!cleanMessage) return res.status(400).json({ error: 'Messaggio non valido.' });
+  if (cleanMessage === '__INJECTION_ATTEMPT__') {
+    console.warn(`[SECURITY] Injection attempt blocked user:${user.id}`);
+    return res.status(400).json({ error: 'Non posso elaborare questa richiesta.' });
+  }
 
   const safeHistory = Array.isArray(history)
     ? history.slice(-20).map(m => ({ role: m.role === 'user' ? 'user' : 'assistant', content: sanitizeMessage(m.content) || '' }))
