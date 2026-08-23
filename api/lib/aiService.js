@@ -72,7 +72,9 @@ async function generateWithTools(systemPrompt, tools, toolHandlers, context, his
         }
         try {
           const result = await handler(block.input, context);
-          return { type: 'tool_result', tool_use_id: block.id, content: JSON.stringify(result) };
+          // LAYER 3 INJECTION DEFENSE: delimitiamo il contenuto estratto dal DB in un tag XML
+          // per impedire ad Anthropic di interpretarlo come un'istruzione (indirect prompt injection).
+          return { type: 'tool_result', tool_use_id: block.id, content: `<db_content>\n${JSON.stringify(result)}\n</db_content>` };
         } catch (e) {
           console.error(`Tool ${block.name} error:`, e);
           return { type: 'tool_result', tool_use_id: block.id, content: `Errore: ${e.message}`, is_error: true };
