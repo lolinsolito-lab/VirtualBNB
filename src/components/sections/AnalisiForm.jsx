@@ -311,7 +311,7 @@ export default function AnalisiForm() {
 
                   <div className="flex flex-col sm:flex-row gap-3 w-full">
                     <a
-                      href="https://calendly.com/lolinsolito/30min"
+                      href="https://calendly.com/virtual-bnb/"
                       target="_blank" rel="noopener noreferrer"
                       className="flex-1 text-center font-sans text-[13px] font-medium tracking-[0.15em] uppercase text-black bg-gold-500 px-6 py-5 hover:bg-white hover:scale-105 transition-all duration-300"
                       style={{ boxShadow: '0 4px 20px rgba(184,150,62,0.3)' }}
