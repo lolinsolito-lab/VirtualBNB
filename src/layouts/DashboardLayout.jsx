@@ -2,6 +2,7 @@ import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
 import { LayoutDashboard, Users, Home, Settings, LogOut, Menu, X, FileText, Repeat } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabaseClient'
+import AiChat from '../components/AiChat'
 
 export default function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -150,6 +151,22 @@ export default function DashboardLayout() {
           <Outlet />
         </main>
       </div>
+
+      {/* AI Chat Widget — ARIA */}
+      {profile?.role === 'admin' && (
+        <AiChat
+          endpoint="/api/adminChat"
+          agentName="ARIA · Admin"
+          welcomeMessage="Ciao! Sono ARIA, il tuo assistente AI per VirtualBNB. Chiedimi qualsiasi cosa: lead, fatturato, immobili, occupazione — ho accesso a tutti i dati in tempo reale."
+        />
+      )}
+      {profile?.role === 'owner' && (
+        <AiChat
+          endpoint="/api/ownerChat"
+          agentName="ARIA · Il tuo Assistente"
+          welcomeMessage="Ciao! Sono ARIA, il tuo assistente personale. Chiedimi come sta andando il tuo immobile, i tuoi guadagni o qualsiasi informazione sui tuoi rendiconti."
+        />
+      )}
     </div>
   )
 }

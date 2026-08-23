@@ -1,0 +1,12 @@
+{
+  "name": "virtualbnb-whatsapp-agent",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Agente AI WhatsApp per VirtualBNB — flusso ospiti + flusso host/lead",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

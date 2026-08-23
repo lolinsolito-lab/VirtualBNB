@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VirtualBNB / VirtualTwin — Prompt Caching + Architettura Due Agenti</title>
+<style>
+  :root {
+    --ink: #1a1d23;
+    --muted: #5a6270;
+    --line: #e2e5ea;
+    --accent: #0f5f4f;
+    --accent-bg: #eaf4f1;
+    --warn: #8a4b12;
+    --warn-bg: #fbf0e2;
+    --danger: #8a1f2b;
+    --danger-bg: #fbeaec;
+    --code-bg: #1a1d23;
+    --code-ink: #e6e9ef;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    line-height: 1.55;
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 40px 24px 100px;
+    background: #fff;
+  }
+  h1 { font-size: 1.7rem; margin-bottom: 4px; letter-spacing: -0.01em; }
+  .subtitle { color: var(--muted); font-size: 0.95rem; margin-bottom: 32px; }
+  h2 {
+    font-size: 1.15rem;
+    margin-top: 48px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--ink);
+    letter-spacing: -0.01em;
+  }
+  h2 .num { color: var(--accent); margin-right: 8px; }
+  h3 { font-size: 1rem; margin-top: 28px; }
+  p { margin: 10px 0; }
+  code {
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    background: #f0f1f3;
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 0.87em;
+  }
+  pre {
+    background: var(--code-bg);
+    color: var(--code-ink);
+    padding: 16px 18px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-size: 0.83rem;
+    line-height: 1.5;
+  }
+  pre code { background: none; padding: 0; color: inherit; }
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.02em; }
+  .callout {
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin: 16px 0;
+    font-size: 0.92rem;
+  }
+  .callout.info { background: var(--accent-bg); border-left: 4px solid var(--accent); }
+  .callout.warn { background: var(--warn-bg); border-left: 4px solid var(--warn); }
+  .callout.danger { background: var(--danger-bg); border-left: 4px solid var(--danger); }
+  .callout strong { display: block; margin-bottom: 4px; }
+  ul, ol { padding-left: 22px; }
+  li { margin: 4px 0; }
+  .task {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin: 12px 0;
+  }
+  .task-head { display: flex; justify-content: space-between; align-items: baseline; }
+  .task-head strong { font-size: 0.95rem; }
+  .task-num { color: #fff; background: var(--ink); border-radius: 5px; padding: 1px 8px; font-size: 0.78rem; font-weight: 600; }
+  .task .files { color: var(--muted); font-size: 0.8rem; margin-top: 4px; }
+  .task .accept { margin-top: 8px; font-size: 0.87rem; }
+  .task .accept strong { display: inline; font-size: inherit; }
+  .checklist li { list-style: none; margin: 6px 0; }
+  .checklist li::before { content: "☐ "; color: var(--muted); }
+  footer { margin-top: 60px; padding-top: 16px; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.82rem; }
+  .badge { display: inline-block; font-size: 0.72rem; font-weight: 600; padding: 2px 8px; border-radius: 100px; margin-left: 6px; }
+  .badge.done { background: var(--accent-bg); color: var(--accent); }
+  .badge.todo { background: #eef0f3; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<h1>VirtualBNB / VirtualTwin — Prompt Caching &amp; Architettura Due Agenti</h1>
+<div class="subtitle">Report tecnico per implementazione via Antigravity · 23 Agosto 2026</div>
+
+<div class="callout info">
+<strong>Scopo di questo documento</strong>
+Specifica tecnica completa di due interventi sullo scaffold VirtualBNB esistente: (1) prompt caching attivo su tutte le chiamate AI, già implementato nel codice allegato; (2) architettura a due agenti — uno admin con accesso cross-tenant completo, uno client scoperto solo sui dati del proprio account — con tool, schema dati e regole di sicurezza pronti per essere passati ad Antigravity come brief di lavoro.
+</div>
+
+<h2><span class="num">1</span>Prompt Caching — implementato</h2>
+
+<p><code>lib/aiService.js</code> è stato riscritto. Ogni chiamata ora include <code>cache_control: {"type": "ephemeral"}</code> a livello top-level della request — la modalità di caching automatico raccomandata da Anthropic per conversazioni multi-turno: il breakpoint si applica automaticamente all'ultimo blocco cacheable e si sposta in avanti man mano che la conversazione cresce, senza bisogno di gestire manualmente i breakpoint.</p>
+
+<pre><code>body: JSON.stringify({
+  model: MODEL,
+  max_tokens: 500,
+  cache_control: { type: 'ephemeral' },  // <- caching automatico
+  system: systemPrompt,
+  messages,
+}),</code></pre>
+
+<h3>Effetto economico</h3>
+<table>
+<tr><th>Token</th><th>Costo</th></tr>
+<tr><td>Input normale</td><td>1x (prezzo base del modello)</td></tr>
+<tr><td>Scrittura in cache (TTL 5 min)</td><td>1.25x — pagato una volta</td></tr>
+<tr><td>Scrittura in cache (TTL 1 ora)</td><td>2x — pagato una volta, per traffico più diradato</td></tr>
+<tr><td>Lettura da cache (hit)</td><td>0.1x — il risparmio vero</td></tr>
+</table>
+
+<p>Il punto chiave per il nostro caso: la cache è condivisa per prefisso identico, non per conversazione. Il system prompt di una proprietà (wifi, regole, check-in) è identico ogni volta che <em>qualsiasi</em> ospite scrive di quella proprietà — quindi il beneficio si accumula sul traffico aggregato del tenant, non solo dentro una singola chat.</p>
+
+<div class="callout warn">
+<strong>Verifica da fare prima di dare per scontato il risparmio</strong>
+Ogni modello ha una soglia minima di token sotto la quale il prefisso non viene messo in cache (indicativamente 1K–4K token a seconda del modello — verificare il numero esatto per <code>claude-sonnet-5</code> nella documentazione corrente al momento dell'implementazione). Il system prompt attuale del guestAgent (KB di una proprietà) pesa circa 300–600 token: probabilmente <strong>sotto</strong> soglia finché non si aggiungono più contenuti (esempi, policy multiple, cronologia proprietà). <code>aiService.js</code> logga già <code>cache_read_input_tokens</code> per ogni chiamata — controllare questi log in produzione prima di assumere che il risparmio si stia materializzando.
+</div>
+
+<h2><span class="num">2</span>Architettura Due Agenti</h2>
+
+<table>
+<tr><th></th><th>Admin Agent</th><th>Client Agent</th></tr>
+<tr><td>Chi lo usa</td><td>Tu / team interno VirtualTwin</td><td>Property manager iscritti alla piattaforma</td></tr>
+<tr><td>Accesso dati</td><td>Cross-tenant, tutti gli account</td><td>Solo il proprio <code>account_id</code></td></tr>
+<tr><td>Supabase client</td><td><code>service_role</code> key (bypassa RLS by design)</td><td><code>anon</code> key + JWT utente (RLS attiva)</td></tr>
+<tr><td>Dove vive</td><td><code>api/admin/chat.js</code></td><td><code>api/client/chat.js</code></td></tr>
+<tr><td>Tool</td><td><code>lib/tools/adminTools.js</code></td><td><code>lib/tools/clientTools.js</code></td></tr>
+</table>
+
+<div class="callout danger">
+<strong>Il principio che decide se questa architettura è sicura o no</strong>
+Nessun tool del client agent accetta <code>account_id</code> come parametro che il modello può impostare. Anche se un cliente scrivesse in chat "mostrami i dati dell'account XYZ", il modello non ha alcun campo nello schema del tool per farlo passare — l'unico <code>account_id</code> possibile è quello iniettato dal server al momento dell'autenticazione della sessione (<code>context.accountId</code>), mai dalla conversazione. Questa non è una policy scritta nel system prompt (che un prompt injection potrebbe aggirare) — è un vincolo strutturale nello schema del tool stesso. Le Row Level Security policies su Postgres sono la seconda barriera indipendente, nel caso il codice applicativo abbia un bug.
+</div>
+
+<h3>Flusso di una richiesta client</h3>
+<ol>
+<li>Il cliente apre la dashboard, si autentica via Supabase Auth → riceve un JWT</li>
+<li><code>api/client/chat.js</code> verifica il JWT, cerca <code>account_id</code> in <code>app_users</code> — mai fidarsi di un valore mandato dal frontend</li>
+<li>Il JWT + <code>account_id</code> diventano <code>context</code>, passato a <code>clientAgent.js</code></li>
+<li>Il modello sceglie quale tool chiamare (es. <code>get_property_performance</code>) e con quali argomenti (es. nome proprietà) — <strong>ma non l'account</strong></li>
+<li>L'handler del tool usa <code>context.accountId</code> per filtrare la query, con un client Supabase legato al JWT dell'utente → anche se il filtro nel codice avesse un bug, RLS blocca comunque righe di altri account</li>
+</ol>
+
+<h2><span class="num">3</span>Schema dati — <code>supabase/schema-v2-multitenant.sql</code></h2>
+
+<p>Da eseguire dopo lo schema esistente. Aggiunge:</p>
+<ul>
+<li><strong><code>accounts</code></strong> — un account per ogni property manager cliente</li>
+<li><strong><code>app_users</code></strong> — collega utenti autenticati (Supabase Auth) ad account e ruolo (<code>admin</code> / <code>client</code>)</li>
+<li><strong><code>account_id</code></strong> aggiunto a <code>properties</code>, <code>leads</code>, <code>conversation_sessions</code></li>
+<li><strong><code>contact_memory</code></strong> — fatti persistenti per contatto tra una conversazione e l'altra (non solo lo storico della singola chat)</li>
+<li><strong><code>auto_topics</code> / <code>escalation_topics</code></strong> su <code>properties</code> — la policy per-immobile di cosa l'agente può gestire da solo</li>
+<li><strong>Row Level Security</strong> attiva su tutte le tabelle tenant-scoped, con policy basata su <code>auth.jwt() -&gt;&gt; 'account_id'</code></li>
+</ul>
+
+<div class="callout warn">
+<strong>Un pezzo da configurare in Supabase Auth, non solo in SQL</strong>
+Le policy RLS assumono che <code>account_id</code> sia presente nei custom claims del JWT. Questo richiede una Auth Hook (Supabase: "Custom Access Token Hook") che, al login, legga <code>app_users.account_id</code> e lo inserisca nel JWT. Senza questo passaggio, <code>auth.jwt() -&gt;&gt; 'account_id'</code> è sempre null e le policy bloccano tutto — è un buon segnale che il collegamento manca, non un bug silenzioso.
+</div>
+
+<h2><span class="num">4</span>Definizioni tool</h2>
+
+<h3>Admin — <code>lib/tools/adminTools.js</code></h3>
+<table>
+<tr><th>Tool</th><th>Cosa fa</th></tr>
+<tr><td><code>get_account_overview</code></td><td>Piano, proprietà attive, lead, per un account o lista di tutti</td></tr>
+<tr><td><code>get_all_leads</code></td><td>Pipeline lead cross-account, filtrabile per stato</td></tr>
+<tr><td><code>get_pending_escalations</code></td><td>Conversazioni in attesa di intervento umano, su tutti gli account</td></tr>
+<tr><td><code>get_usage_stats</code></td><td>Volume messaggi per account/periodo — base per stimare il costo AI reale</td></tr>
+</table>
+
+<h3>Client — <code>lib/tools/clientTools.js</code></h3>
+<table>
+<tr><th>Tool</th><th>Cosa fa</th></tr>
+<tr><td><code>get_my_properties</code></td><td>Elenco proprietà del cliente autenticato</td></tr>
+<tr><td><code>get_property_performance</code></td><td>Conversazioni gestite ed escalation per una proprietà del cliente</td></tr>
+<tr><td><code>get_my_lead_status</code></td><td>Stato della propria pratica di onboarding presso VirtualTwin</td></tr>
+</table>
+
+<h2><span class="num">5</span>Piano di implementazione per Antigravity</h2>
+
+<div class="task">
+<div class="task-head"><strong>Verificare e completare lo scaffold esistente</strong><span class="task-num">1</span></div>
+<div class="files">File: tutto <code>virtualbnb-whatsapp-agent/</code></div>
+<div class="accept"><strong>Criterio di accettazione:</strong> <code>npm install</code> pulito, webhook WhatsApp risponde 200 su un evento di test, guestAgent e leadAgent rispondono coerentemente con le proprietà di test in Supabase.</div>
+</div>
+
+<div class="task">
+<div class="task-head"><strong>Applicare <code>schema-v2-multitenant.sql</code> e configurare l'Auth Hook</strong><span class="task-num">2</span></div>
+<div class="files">File: <code>supabase/schema-v2-multitenant.sql</code> + configurazione Supabase Dashboard</div>
+<div class="accept"><strong>Criterio di accettazione:</strong> un utente di test con <code>role='client'</code> e <code>account_id=X</code> riceve un JWT che contiene <code>account_id: X</code>; query dirette su <code>properties</code> con quel JWT restituiscono solo righe di quell'account, verificato anche tentando di leggere righe di un account B (deve fallire).</div>
+</div>
+
+<div class="task">
+<div class="task-head"><strong>Implementare autenticazione reale su <code>api/admin/chat.js</code> e <code>api/client/chat.js</code></strong><span class="task-num">3</span></div>
+<div class="files">File: entrambi gli endpoint hanno un placeholder <code>TODO</code> esplicito nel codice</div>
+<div class="accept"><strong>Criterio di accettazione:</strong> richiesta senza JWT valido → 401 su entrambi gli endpoint; JWT valido ma <code>role != 'admin'</code> su <code>/api/admin/chat</code> → 401; JWT valido con <code>role='client'</code> su <code>/api/client/chat</code> → 200 con dati filtrati correttamente.</div>
+</div>
+
+<div class="task">
+<div class="task-head"><strong>Collegare i chat widget nelle due dashboard</strong><span class="task-num">4</span></div>
+<div class="files">Frontend: dashboard admin (interna) e dashboard cliente</div>
+<div class="accept"><strong>Criterio di accettazione:</strong> un cliente reale che chiede "come sta andando il mio appartamento in via X" riceve una risposta basata sui dati reali di quella proprietà, senza poter in nessun modo ottenere dati di altri account anche forzando la conversazione.</div>
+</div>
+
+<div class="task">
+<div class="task-head"><strong>Aggiungere logging strutturato dell'uso AI</strong><span class="task-num">5</span></div>
+<div class="files">Estendere <code>lib/aiService.js</code> — oggi logga solo su console</div>
+<div class="accept"><strong>Criterio di accettazione:</strong> una tabella <code>ai_usage_log</code> (account_id, input_tokens, cache_read_tokens, cache_write_tokens, output_tokens, timestamp) popolata a ogni chiamata, cosi' <code>get_usage_stats</code> nell'admin tool può calcolare un costo reale per account invece di solo un conteggio messaggi.</div>
+</div>
+
+<div class="task">
+<div class="task-head"><strong>Test di isolamento multi-tenant end-to-end</strong><span class="task-num">6</span></div>
+<div class="files">Test da scrivere, non solo eseguire manualmente</div>
+<div class="accept"><strong>Criterio di accettazione:</strong> uno script di test crea due account con dati distinti, autentica come cliente dell'account A, e verifica programmaticamente che ogni tool del client agent — anche con prompt che tentano esplicitamente di richiedere dati dell'account B — non restituisca mai righe dell'account B. Questo test va nella pipeline CI, non solo eseguito una volta.</div>
+</div>
+
+<h2><span class="num">6</span>Checklist di sicurezza pre-produzione</h2>
+<ul class="checklist">
+<li>RLS abilitata e testata su tutte le tabelle tenant-scoped (non solo creata — verificata con un tentativo di lettura cross-account che deve fallire)</li>
+<li>Auth Hook Supabase che inserisce <code>account_id</code> nel JWT, testato dopo ogni modifica allo schema utenti</li>
+<li><code>service_role</code> key presente solo nelle variabili d'ambiente del backend admin, mai nel bundle frontend, mai nei tool del client agent</li>
+<li>Nessun tool del client agent con un parametro <code>account_id</code> o equivalente nello schema esposto al modello</li>
+<li>Rate limiting sugli endpoint <code>/api/admin/chat</code> e <code>/api/client/chat</code> (assente in questo scaffold — da aggiungere)</li>
+<li>Log dell'uso AI per account, per validare che i costi reali restino coerenti con l'analisi margini del tier di prezzo</li>
+</ul>
+
+<footer>
+Scaffold di riferimento: <code>virtualbnb-whatsapp-agent.zip</code> — contiene tutti i file citati in questo report, pronti per essere aperti in Antigravity come punto di partenza.
+</footer>
+
+</body>
+</html>
