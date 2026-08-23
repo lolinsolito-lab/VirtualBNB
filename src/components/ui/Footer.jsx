@@ -10,7 +10,8 @@ const navItems = [
 
 const scrollTo = (id) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 
-const EMAIL = 'info@virtual-bnb.it'
+const EMAIL_GDPR = 'lolinsolito@gmail.com'      // Richieste GDPR e privacy
+const EMAIL_PEC  = 'insolitoproperty@pec.it'    // Corrispondenza formale e legale
 
 const LEGAL = {
   privacy: {
@@ -20,7 +21,7 @@ const LEGAL = {
         <p className="text-sm text-dark-300 mb-6">Ultimo aggiornamento: 23 Agosto 2026</p>
 
         <h3 className="font-serif text-[20px] text-white mt-6 mb-2">1. Titolare del trattamento</h3>
-        <p>Insolito Experiences di Jara Lloctun Michael Sergio, P.IVA 14379200968, con sede in Via Uboldo n. 8, 20063 Cernusco sul Naviglio (MI). Per qualsiasi richiesta relativa al trattamento dei tuoi dati personali: <a href={`mailto:${EMAIL}`} className="text-gold-500 border-b border-gold-500/30">{EMAIL}</a>.</p>
+        <p>Insolito Experiences di Jara Lloctun Michael Sergio, P.IVA 14379200968, con sede in Via Uboldo n. 8, 20063 Cernusco sul Naviglio (MI). Per qualsiasi richiesta relativa al trattamento dei tuoi dati personali: <a href={`mailto:${EMAIL_GDPR}`} className="text-gold-500 border-b border-gold-500/30">{EMAIL_GDPR}</a>.</p>
 
         <h3 className="font-serif text-[20px] text-white mt-8 mb-2">2. Dati raccolti</h3>
         <ul className="list-disc pl-5 space-y-2">
@@ -46,7 +47,7 @@ const LEGAL = {
         <p>I dati sono conservati per il tempo necessario a fornire il servizio e adempiere agli obblighi di legge (tipicamente 10 anni per la documentazione fiscale). I lead non convertiti in clienti vengono conservati per un massimo di 24 mesi, salvo richiesta di cancellazione anticipata.</p>
 
         <h3 className="font-serif text-[20px] text-white mt-8 mb-2">6. I tuoi diritti</h3>
-        <p>Ai sensi degli artt. 15-22 del GDPR, hai diritto di accesso, rettifica, cancellazione, limitazione del trattamento, portabilità dei dati e opposizione. Per esercitarli scrivi a <a href={`mailto:${EMAIL}`} className="text-gold-500 border-b border-gold-500/30">{EMAIL}</a>. Hai inoltre diritto di proporre reclamo al Garante per la Protezione dei Dati Personali (<a href="https://www.garanteprivacy.it" target="_blank" rel="noopener noreferrer" className="text-gold-500 border-b border-gold-500/30">garanteprivacy.it</a>).</p>
+        <p>Ai sensi degli artt. 15-22 del GDPR, hai diritto di accesso, rettifica, cancellazione, limitazione del trattamento, portabilità dei dati e opposizione. Per esercitarli scrivi a <a href={`mailto:${EMAIL_GDPR}`} className="text-gold-500 border-b border-gold-500/30">{EMAIL_GDPR}</a>. Hai inoltre diritto di proporre reclamo al Garante per la Protezione dei Dati Personali (<a href="https://www.garanteprivacy.it" target="_blank" rel="noopener noreferrer" className="text-gold-500 border-b border-gold-500/30">garanteprivacy.it</a>).</p>
 
         <h3 className="font-serif text-[20px] text-white mt-8 mb-2">7. Fornitori terzi (sub-responsabili del trattamento)</h3>
         <table className="w-full text-sm mt-4 border-collapse">
@@ -87,7 +88,7 @@ const LEGAL = {
         <h3 className="font-serif text-[20px] text-white mt-8 mb-2">6. Legge applicabile</h3>
         <p>I presenti Termini sono regolati dalla legge italiana. Per ogni controversia è competente il foro di Milano, salvo diversa previsione inderogabile a tutela del consumatore.</p>
 
-        <p className="font-mono text-[12px] text-dark-400 mt-10 pt-6 border-t border-gold-500/15">Insolito Experiences di Jara Lloctun Michael Sergio · P.IVA IT14379200968 · Via Uboldo n. 8, 20063 Cernusco sul Naviglio (MI) · <a href={`mailto:${EMAIL}`} className="text-gold-500">{EMAIL}</a></p>
+        <p className="font-mono text-[12px] text-dark-400 mt-10 pt-6 border-t border-gold-500/15">Insolito Experiences di Jara Lloctun Michael Sergio · P.IVA IT14379200968 · Via Uboldo n. 8, 20063 Cernusco sul Naviglio (MI) · PEC: <a href={`mailto:${EMAIL_PEC}`} className="text-gold-500">{EMAIL_PEC}</a></p>
       </>
     ),
   },
@@ -112,7 +113,7 @@ const LEGAL = {
         <h3 className="font-serif text-[20px] text-white mt-8 mb-2">Come gestire i cookie</h3>
         <p>Puoi modificare le tue preferenze in qualsiasi momento tramite il banner cookie presente sul sito, oppure dalle impostazioni del tuo browser.</p>
 
-        <p className="font-mono text-[12px] text-dark-400 mt-10 pt-6 border-t border-gold-500/15">Insolito Experiences di Jara Lloctun Michael Sergio · P.IVA IT14379200968 · <a href={`mailto:${EMAIL}`} className="text-gold-500">{EMAIL}</a></p>
+        <p className="font-mono text-[12px] text-dark-400 mt-10 pt-6 border-t border-gold-500/15">Insolito Experiences di Jara Lloctun Michael Sergio · P.IVA IT14379200968 · <a href={`mailto:${EMAIL_GDPR}`} className="text-gold-500">{EMAIL_GDPR}</a></p>
       </>
     ),
   },
