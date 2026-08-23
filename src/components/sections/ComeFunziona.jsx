@@ -12,7 +12,7 @@ const steps = [
     num: '01',
     tag: 'Analisi · Studio di fattibilità',
     title: 'Valutazione e proiezioni di mercato',
-    desc: 'Non accettiamo ogni immobile. Partiamo da un audit rigoroso del tuo asset. Incrociamo i dati reali del tuo indirizzo con i nostri benchmark per offrirti tre proiezioni di guadagno realistiche (conservativa, media, ottima). Solo numeri, niente promesse fittizie.',
+    desc: 'Non accettiamo ogni immobile. Partiamo da un audit rigoroso del tuo asset. Incrociamo i dati reali del tuo indirizzo con i nostri benchmark per offrirti tre proiezioni di guadagno realistiche (base, buono, ottimo). Solo numeri, niente promesse fittizie.',
   },
   {
     num: '02',
