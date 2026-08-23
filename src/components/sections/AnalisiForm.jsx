@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-
-const WEBHOOK_URL = 'https://hook.eu2.make.com/ktuw8uc8ommcsopo9db6gltpqd36xrsj'
+import { supabase } from '../../lib/supabaseClient'
 
 // ------------------------------------------------------------------
 // MOTORE STIMA LIVE
@@ -110,11 +109,29 @@ export default function AnalisiForm() {
       timestamp: new Date().toISOString(),
     }
     try {
-      await fetch(WEBHOOK_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      })
+      const { error } = await supabase.from('leads').insert([{
+        full_name: payload.nome,
+        email: payload.email,
+        phone: payload.telefono || null,
+        address: payload.indirizzo,
+        property_type: payload.tipologia,
+        sqm: parseInt(payload.mq, 10) || null,
+        guests: parseInt(payload.ospiti, 10) || null,
+        metadata: {
+          zona: payload.zona,
+          stato_attuale: payload.stato,
+          note_aggiuntive: payload.messaggio,
+          stima_revpar: payload.stima_revpar,
+          stima_revenue_base: payload.stima_revenue_base,
+          stima_revenue_buono: payload.stima_revenue_buono,
+          stima_revenue_ottimo: payload.stima_revenue_ottimo,
+          stima_tier: payload.stima_tier,
+          tipo: payload.tipo
+        }
+      }])
+      
+      if (error) throw error
+
       setLastPayload(payload)
       setStatus('success')
     } catch {
