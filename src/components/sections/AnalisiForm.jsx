@@ -285,9 +285,9 @@ export default function AnalisiForm() {
                     </>
                   ) : (
                     <>
-                      <h3 className="font-serif text-[28px] text-white mb-4">Richiesta inviata</h3>
+                      <h3 className="font-serif text-[28px] text-white mb-4">Dati acquisiti</h3>
                       <p className="font-sans font-light text-[16px] text-dark-100 leading-relaxed mb-8 max-w-sm">
-                        Il nostro team sta analizzando i dati del tuo immobile. Ti contattiamo entro 24 ore lavorative.
+                        Abbiamo ricevuto i dettagli del tuo immobile. Puoi già prenotare la tua call di analisi 360° gratuita qui sotto, oppure farci una domanda rapida su WhatsApp.
                       </p>
                     </>
                   )}
