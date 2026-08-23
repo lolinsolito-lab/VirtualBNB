@@ -280,7 +280,7 @@ export default function AnalisiForm() {
                         ))}
                       </div>
                       <p className="font-sans font-light text-[15px] text-dark-100 leading-relaxed mb-8 max-w-sm">
-                        Tier consigliato: <span className="text-gold-400">{estimate.tier}</span>. Un nostro consulente ti contatta entro 24 ore con l'analisi completa, oppure continua subito su WhatsApp.
+                        Tier consigliato: <span className="text-gold-400">{estimate.tier}</span>. Questa è la stima rapida — se vuoi l'analisi completa a 360° (comparabili reali, proiezione dettagliata, revisione del contratto), prenota una call gratuita di 20 minuti.
                       </p>
                     </>
                   ) : (
@@ -292,14 +292,23 @@ export default function AnalisiForm() {
                     </>
                   )}
 
-                  <a
-                    href={`https://wa.me/393393522164?text=${encodeURIComponent(waMessage)}`}
-                    target="_blank" rel="noopener noreferrer"
-                    className="font-sans text-[13px] font-medium tracking-[0.15em] uppercase text-black bg-gold-500 px-8 py-5 hover:bg-white hover:scale-105 transition-all duration-300 w-full md:w-auto"
-                    style={{ boxShadow: '0 4px 20px rgba(184,150,62,0.3)' }}
-                  >
-                    Continua su WhatsApp ora
-                  </a>
+                  <div className="flex flex-col sm:flex-row gap-3 w-full">
+                    <a
+                      href="https://calendly.com/lolinsolito/30min"
+                      target="_blank" rel="noopener noreferrer"
+                      className="flex-1 text-center font-sans text-[13px] font-medium tracking-[0.15em] uppercase text-black bg-gold-500 px-6 py-5 hover:bg-white hover:scale-105 transition-all duration-300"
+                      style={{ boxShadow: '0 4px 20px rgba(184,150,62,0.3)' }}
+                    >
+                      Prenota analisi 360°
+                    </a>
+                    <a
+                      href={`https://wa.me/393393522164?text=${encodeURIComponent(waMessage)}`}
+                      target="_blank" rel="noopener noreferrer"
+                      className="flex-1 text-center font-sans text-[13px] font-medium tracking-[0.15em] uppercase text-white border border-white/20 px-6 py-5 hover:border-gold-500 hover:text-gold-400 transition-all duration-300"
+                    >
+                      Due domande su WhatsApp
+                    </a>
+                  </div>
                 </motion.div>
               ) : (
                 <form className="flex flex-col gap-8" onSubmit={handleSubmit}>
