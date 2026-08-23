@@ -1,32 +1,84 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../../lib/supabaseClient'
 
 // ------------------------------------------------------------------
-// MOTORE STIMA LIVE
-// Dati aggregati indicativi per zona di Milano (ADR = tariffa media
+// MOTORE STIMA LIVE — ora multi-città
+// Dati aggregati indicativi per città/zona (ADR = tariffa media
 // notturna, occ = occupazione media stimata). Numeri di partenza
 // ragionevoli, NON dati di mercato in tempo reale — vanno presentati
 // come stima, mai come cifra garantita (vedi disclaimer nel render).
-// TODO Antigravity: quando l'integrazione Firecrawl sui comparabili
-// reali (Airbnb/Booking) sarà pronta, questa tabella statica può
-// essere sostituita o affinata con dati live per zona.
+// TODO: quando l'integrazione PriceLabs Market Dashboards/Customer API
+// sarà collegata, questa tabella statica va sostituita con dati reali.
 // ------------------------------------------------------------------
-const ZONE_DATA = {
-  'Centro Storico / Duomo': { adr: 130, occ: 0.68 },
-  'Brera / Quadrilatero': { adr: 125, occ: 0.67 },
-  'Navigli': { adr: 98, occ: 0.72 },
-  'Porta Romana': { adr: 92, occ: 0.71 },
-  'Isola / Porta Nuova': { adr: 100, occ: 0.70 },
-  'Porta Venezia': { adr: 90, occ: 0.70 },
-  'City Life / Sempione': { adr: 95, occ: 0.69 },
-  'Città Studi / Bocconi': { adr: 78, occ: 0.68 },
-  'Lambrate': { adr: 70, occ: 0.66 },
-  'Bicocca': { adr: 62, occ: 0.63 },
-  'San Siro / Fiera': { adr: 65, occ: 0.64 },
-  'Altra zona Milano': { adr: 58, occ: 0.62 },
-  'Hinterland / Fuori Milano': { adr: 45, occ: 0.58 },
+const CITY_DATA = {
+  'Milano': {
+    zones: {
+      'Centro Storico / Duomo': { adr: 130, occ: 0.68 },
+      'Brera / Quadrilatero': { adr: 125, occ: 0.67 },
+      'Navigli': { adr: 98, occ: 0.72 },
+      'Porta Romana': { adr: 92, occ: 0.71 },
+      'Isola / Porta Nuova': { adr: 100, occ: 0.70 },
+      'Porta Venezia': { adr: 90, occ: 0.70 },
+      'City Life / Sempione': { adr: 95, occ: 0.69 },
+      'Città Studi / Bocconi': { adr: 78, occ: 0.68 },
+      'Lambrate': { adr: 70, occ: 0.66 },
+      'Bicocca': { adr: 62, occ: 0.63 },
+      'San Siro / Fiera': { adr: 65, occ: 0.64 },
+      'Altra zona Milano': { adr: 58, occ: 0.62 },
+      'Hinterland Milano': { adr: 45, occ: 0.58 },
+    },
+  },
+  'Roma': {
+    zones: {
+      'Centro Storico / Pantheon-Navona': { adr: 140, occ: 0.70 },
+      'Trastevere': { adr: 115, occ: 0.72 },
+      'Prati / Vaticano': { adr: 100, occ: 0.68 },
+      'Monti / Esquilino': { adr: 95, occ: 0.68 },
+      'Testaccio / San Saba': { adr: 85, occ: 0.66 },
+      'EUR': { adr: 70, occ: 0.60 },
+      'Altra zona Roma': { adr: 65, occ: 0.60 },
+    },
+  },
+  'Firenze': {
+    zones: {
+      'Centro Storico / Duomo': { adr: 135, occ: 0.72 },
+      'Oltrarno / Santo Spirito': { adr: 105, occ: 0.70 },
+      'Santa Croce': { adr: 100, occ: 0.69 },
+      'San Lorenzo / Stazione': { adr: 85, occ: 0.65 },
+      'Altra zona Firenze': { adr: 65, occ: 0.60 },
+    },
+  },
+  'Venezia': {
+    zones: {
+      'San Marco': { adr: 170, occ: 0.72 },
+      'Dorsoduro': { adr: 125, occ: 0.69 },
+      'Cannaregio': { adr: 120, occ: 0.70 },
+      'Castello': { adr: 105, occ: 0.67 },
+      'Mestre (Terraferma)': { adr: 65, occ: 0.62 },
+      'Altra zona Venezia': { adr: 70, occ: 0.60 },
+    },
+  },
+  'Bologna': {
+    zones: {
+      'Centro Storico / Torri': { adr: 90, occ: 0.66 },
+      'Università / Zamboni': { adr: 78, occ: 0.65 },
+      'Fiera District': { adr: 72, occ: 0.60 },
+      'Altra zona Bologna': { adr: 58, occ: 0.58 },
+    },
+  },
+  'Torino': {
+    zones: {
+      'Centro / Quadrilatero Romano': { adr: 82, occ: 0.63 },
+      'San Salvario': { adr: 72, occ: 0.62 },
+      'Crocetta': { adr: 68, occ: 0.60 },
+      'Altra zona Torino': { adr: 55, occ: 0.56 },
+    },
+  },
 }
+
+const OTHER_CITY = 'Altra città'
+const CITY_OPTIONS = [...Object.keys(CITY_DATA), OTHER_CITY]
 
 const TYPE_MULTIPLIER = {
   'Monolocale': 0.72,
@@ -38,21 +90,21 @@ const TYPE_MULTIPLIER = {
 
 // Soglie basate sui tier reali pubblicati in Prezzi (non etichette inventate):
 // Essenziale 25% revenue · Smart 28% revenue (tier più scelto) · Premium €650/mese fisso, zero commissioni.
-// Il break-even Smart→Premium è dove il 28% supera il flat fee: 650 / 0.28 ≈ €2.320/mese.
-// Sopra quella soglia il fisso conviene di più, coerente col posizionamento "luxury / multi-property" di Premium.
+// Break-even Smart→Premium: 650 / 0.28 ≈ €2.320/mese.
 function suggestTier(monthlyRevenue) {
   if (monthlyRevenue >= 2300) return 'Premium'
   if (monthlyRevenue >= 1200) return 'Smart'
   return 'Essenziale'
 }
 
-function computeEstimate(zona, tipologia) {
-  const z = ZONE_DATA[zona]
+function computeEstimate(citta, zona, tipologia) {
+  const zoneMap = CITY_DATA[citta]?.zones
+  const z = zoneMap?.[zona]
   const mult = TYPE_MULTIPLIER[tipologia]
   if (!z || !mult) return null
 
   const adr = Math.round(z.adr * mult)
-  const revpar = Math.round(adr * z.occ) // RevPAR = ADR × occupazione — stesso indicatore mostrato nell'Owner Portal
+  const revpar = Math.round(adr * z.occ)
   const monthlyMid = adr * z.occ * 30
 
   const base = Math.round(monthlyMid * 0.83 / 10) * 10
@@ -62,6 +114,45 @@ function computeEstimate(zona, tipologia) {
   const tier = suggestTier(buono)
 
   return { adr, revpar, base, buono, ottimo, tier }
+}
+
+// ------------------------------------------------------------------
+// VERIFICA INDIRIZZO — OpenStreetMap / Nominatim, gratuito, senza
+// API key né account. Dati pubblici (licenza ODbL, richiede solo
+// attribuzione visibile — vedi nota sotto il campo Via nel render).
+// Rispettiamo la policy d'uso (max ~1 richiesta/sec) con un debounce:
+// la ricerca parte solo dopo che l'utente smette di digitare per un
+// momento, non a ogni tasto premuto.
+// ------------------------------------------------------------------
+const NOMINATIM_URL = 'https://nominatim.openstreetmap.org/search'
+
+async function searchAddress(query) {
+  if (!query || query.trim().length < 4) return []
+  const params = new URLSearchParams({
+    q: query,
+    format: 'jsonv2',
+    addressdetails: '1',
+    countrycodes: 'it',
+    limit: '5',
+  })
+  try {
+    const res = await fetch(`${NOMINATIM_URL}?${params}`, {
+      headers: { 'Accept-Language': 'it' },
+    })
+    if (!res.ok) return []
+    return await res.json()
+  } catch {
+    return [] // silenzioso: se il servizio non risponde, il campo resta testo libero
+  }
+}
+
+function useDebouncedValue(value, delay) {
+  const [debounced, setDebounced] = useState(value)
+  useEffect(() => {
+    const t = setTimeout(() => setDebounced(value), delay)
+    return () => clearTimeout(t)
+  }, [value, delay])
+  return debounced
 }
 
 const fmt = (n) => n.toLocaleString('it-IT')
@@ -78,29 +169,73 @@ const labelClass = 'font-sans text-[12px] tracking-[0.2em] uppercase text-gold-5
 
 export default function AnalisiForm() {
   const [status, setStatus] = useState('idle') // idle | loading | success | error
+  const [citta, setCitta] = useState('')
   const [zona, setZona] = useState('')
+  const [altraCitta, setAltraCitta] = useState('')
   const [tipologia, setTipologia] = useState('')
+  const [coords, setCoords] = useState(null)
   const [lastPayload, setLastPayload] = useState(null)
 
-  const estimate = useMemo(() => computeEstimate(zona, tipologia), [zona, tipologia])
+  const [indirizzoQuery, setIndirizzoQuery] = useState('')
+  const [suggestions, setSuggestions] = useState([])
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const debouncedQuery = useDebouncedValue(indirizzoQuery, 600)
+
+  const estimate = useMemo(() => computeEstimate(citta, zona, tipologia), [citta, zona, tipologia])
+  const isOtherCity = citta === OTHER_CITY
+
+  // Reset della zona quando cambia città, per non tenere selezionata una zona
+  // di un'altra città (evita stime sbagliate per errore residuo)
+  useEffect(() => {
+    setZona('')
+  }, [citta])
+
+  // Verifica indirizzo via Nominatim — parte solo dopo la pausa nella digitazione
+  useEffect(() => {
+    let cancelled = false
+    if (coords && debouncedQuery === indirizzoQuery) return // già selezionato, non ricercare
+    searchAddress(debouncedQuery).then((results) => {
+      if (!cancelled) setSuggestions(results)
+    })
+    return () => { cancelled = true }
+  }, [debouncedQuery])
+
+  function handleSelectSuggestion(place) {
+    const label = place.display_name.split(',').slice(0, 3).join(',')
+    setIndirizzoQuery(label)
+    setShowSuggestions(false)
+    setCoords({ lat: parseFloat(place.lat), lng: parseFloat(place.lon) })
+
+    const addr = place.address || {}
+    const detectedCity = addr.city || addr.town || addr.village || addr.municipality
+    if (detectedCity) {
+      const matched = Object.keys(CITY_DATA).find(
+        (c) => c.toLowerCase() === detectedCity.toLowerCase(),
+      )
+      // Auto-seleziona la città se riconosciuta; la zona resta scelta manuale.
+      if (matched) setCitta(matched)
+    }
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setStatus('loading')
     const form = e.currentTarget
+    const cittaFinale = isOtherCity ? altraCitta : citta
     const payload = {
       tipo: 'analisi_gratuita',
       nome: form.elements.namedItem('nome').value,
       email: form.elements.namedItem('email').value,
       indirizzo: form.elements.namedItem('indirizzo').value,
-      zona,
+      citta: cittaFinale,
+      zona: isOtherCity ? null : zona,
+      coords, // { lat, lng } | null
       tipologia,
       mq: form.elements.namedItem('mq').value,
       ospiti: form.elements.namedItem('ospiti').value,
       stato: form.elements.namedItem('stato').value,
       telefono: form.elements.namedItem('telefono').value,
       messaggio: form.elements.namedItem('messaggio').value,
-      // Stima calcolata lato client, inviata come contesto per la qualifica lead
       stima_revpar: estimate?.adr ?? null,
       stima_revenue_base: estimate?.base ?? null,
       stima_revenue_buono: estimate?.buono ?? null,
@@ -108,6 +243,7 @@ export default function AnalisiForm() {
       stima_tier: estimate?.tier ?? null,
       timestamp: new Date().toISOString(),
     }
+    
     try {
       const { error } = await supabase.from('leads').insert([{
         full_name: payload.nome,
@@ -118,7 +254,9 @@ export default function AnalisiForm() {
         sqm: parseInt(payload.mq, 10) || null,
         guests: parseInt(payload.ospiti, 10) || null,
         metadata: {
+          citta: payload.citta,
           zona: payload.zona,
+          coords: payload.coords,
           stato_attuale: payload.stato,
           note_aggiuntive: payload.messaggio,
           stima_revpar: payload.stima_revpar,
@@ -140,8 +278,8 @@ export default function AnalisiForm() {
   }
 
   const waMessage = estimate
-    ? `Ciao! Ho appena fatto l'analisi gratuita per il mio immobile in zona ${zona} (${tipologia}). Stima ricevuta: ${fmt(estimate.buono)}€/mese, ${estimate.tier}. Vorrei parlarne.`
-    : `Ciao! Vorrei un'analisi gratuita per il mio immobile.`
+    ? `Ciao! Ho appena fatto l'analisi gratuita per il mio immobile in zona ${zona}, ${citta} (${tipologia}). Stima ricevuta: ${fmt(estimate.buono)}€/mese, Tier ${estimate.tier}. Vorrei parlarne.`
+    : `Ciao! Vorrei un'analisi gratuita per il mio immobile${citta ? ` a ${isOtherCity ? altraCitta : citta}` : ''}.`
 
   return (
     <section id="analisi" className="bg-dark-900 relative overflow-hidden text-left">
@@ -170,7 +308,7 @@ export default function AnalisiForm() {
                 <em className="italic text-gold-400">davvero</em> il tuo immobile.
               </h2>
               <p className="font-sans font-light text-[19px] text-dark-100 leading-relaxed mb-12 max-w-lg">
-                Seleziona zona e tipologia: la stima si aggiorna subito, qui sotto. Nessun impegno, nessuna attesa.
+                Seleziona città, zona e tipologia: la stima si aggiorna subito, qui sotto. Nessun impegno, nessuna attesa.
               </p>
 
               <div className="flex flex-col gap-0">
@@ -250,7 +388,7 @@ export default function AnalisiForm() {
                         Questa è un'anteprima di quello che vedrai nel tuo Owner Portal. Con il metodo VirtualBNB (pricing dinamico ogni 6h, distribuzione multi-canale, direct booking) i risultati reali spesso superano lo scenario "ottimo" — vedi gli esempi qui sopra.
                       </p>
                       <p className="font-sans text-[11.5px] text-dark-200/70 leading-relaxed mt-3">
-                        Stima indicativa su dati aggregati per zona e tipologia. Il confronto su comparabili reali arriva con l'analisi personalizzata, gratuita, entro 24 ore.
+                        Stima indicativa su dati aggregati per zona e tipologia. Invia il form per vedere il dettaglio completo e prenotare, se vuoi, l'analisi 360° con un consulente.
                       </p>
                     </div>
                   </motion.div>
@@ -341,23 +479,81 @@ export default function AnalisiForm() {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
-                    <div>
+                    <div className="relative">
                       <label className={labelClass}>Via</label>
-                      <input name="indirizzo" type="text" className={inputClass} placeholder="Via Tortona 12" required />
+                      <input
+                        name="indirizzo" type="text" className={inputClass}
+                        placeholder="Inizia a scrivere l'indirizzo..."
+                        value={indirizzoQuery}
+                        onChange={(e) => { setIndirizzoQuery(e.target.value); setCoords(null); setShowSuggestions(true) }}
+                        onFocus={() => setShowSuggestions(true)}
+                        onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+                        required autoComplete="off"
+                      />
+                      <AnimatePresence>
+                        {showSuggestions && suggestions.length > 0 && (
+                          <motion.ul
+                            initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                            className="absolute z-20 left-0 right-0 mt-1 bg-dark-900 border border-white/15 max-h-56 overflow-y-auto"
+                            style={{ boxShadow: '0 12px 30px rgba(0,0,0,0.5)' }}
+                          >
+                            {suggestions.map((s) => (
+                              <li key={s.place_id}>
+                                <button
+                                  type="button"
+                                  onMouseDown={(e) => e.preventDefault()}
+                                  onClick={() => handleSelectSuggestion(s)}
+                                  className="w-full text-left px-4 py-3 font-sans text-[14px] text-dark-100 hover:bg-gold-500/10 hover:text-gold-400 transition-colors border-b border-white/5 last:border-0"
+                                >
+                                  {s.display_name}
+                                </button>
+                              </li>
+                            ))}
+                          </motion.ul>
+                        )}
+                      </AnimatePresence>
+                      <p className="font-sans text-[10.5px] text-dark-200/50 mt-2">Verifica indirizzo © OpenStreetMap contributors</p>
                     </div>
                     <div>
-                      <label className={labelClass}>Zona</label>
+                      <label className={labelClass}>Città</label>
                       <select
-                        name="zona" className={inputClass} style={{ appearance: 'none', cursor: 'pointer' }}
-                        required value={zona} onChange={(e) => setZona(e.target.value)}
+                        name="citta" className={inputClass} style={{ appearance: 'none', cursor: 'pointer' }}
+                        required value={citta} onChange={(e) => setCitta(e.target.value)}
                       >
                         <option value="" disabled>Seleziona</option>
-                        {Object.keys(ZONE_DATA).map((z) => (
-                          <option key={z} value={z} style={{ background: '#111111' }}>{z}</option>
+                        {CITY_OPTIONS.map((c) => (
+                          <option key={c} value={c} style={{ background: '#111111' }}>{c}</option>
                         ))}
                       </select>
                     </div>
                   </div>
+
+                  {isOtherCity ? (
+                    <div>
+                      <label className={labelClass}>Nome della città</label>
+                      <input
+                        type="text" className={inputClass} placeholder="Es. Verona, Bergamo, Como..."
+                        value={altraCitta} onChange={(e) => setAltraCitta(e.target.value)} required
+                      />
+                      <p className="font-sans text-[12.5px] text-dark-200/70 mt-3">
+                        La stima automatica copre per ora le 6 città principali. Per la tua città prepariamo comunque un'analisi su misura — prenota pure la call.
+                      </p>
+                    </div>
+                  ) : (
+                    <div>
+                      <label className={labelClass}>Zona</label>
+                      <select
+                        name="zona" className={inputClass} style={{ appearance: 'none', cursor: 'pointer' }}
+                        required={!isOtherCity} value={zona} onChange={(e) => setZona(e.target.value)}
+                        disabled={!citta}
+                      >
+                        <option value="" disabled>{citta ? 'Seleziona' : 'Prima seleziona la città'}</option>
+                        {citta && Object.keys(CITY_DATA[citta].zones).map((z) => (
+                          <option key={z} value={z} style={{ background: '#111111' }}>{z}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
                     <div>
