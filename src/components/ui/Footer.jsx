@@ -10,19 +10,56 @@ const navItems = [
 
 const scrollTo = (id) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 
+const EMAIL = 'info@virtual-bnb.it'
+
 const LEGAL = {
   privacy: {
-    title: 'Privacy Policy & AI',
+    title: 'Privacy Policy',
     content: (
       <>
-        <p>In conformità con il GDPR (UE) 2016/679, il D.Lgs. 196/2003 e le linee guida dell'AI Act europeo, i dati personali raccolti sono trattati da VirtualBNB (Insolito Experiences di Michael Jara), con sede legale in Via [Tua Via], Milano, Italia.</p>
-        <h3 className="font-serif text-[22px] text-white mt-8 mb-2">Dati raccolti e Finalità</h3>
-        <p>Raccogliamo nome, email, telefono e informazioni sull'immobile al fine di rispondere alle richieste di contatto, fornire stime di revenue (Analisi Gratuita) e, previo consenso esplicito, per comunicazioni commerciali.</p>
-        <h3 className="font-serif text-[22px] text-white mt-8 mb-2">Uso dell'Intelligenza Artificiale</h3>
-        <p>Per offrire un servizio all'avanguardia, utilizziamo sistemi di Intelligenza Artificiale (inclusi algoritmi di terze parti come OpenAI) per la gestione automatizzata delle tariffe (Dynamic Pricing) e per l'assistenza via chat (AI WhatsApp). I dati inseriti nella chat WhatsApp potrebbero essere elaborati da server esterni unicamente al fine di generare risposte coerenti. Non usiamo i tuoi dati sensibili per addestrare modelli pubblici.</p>
-        <h3 className="font-serif text-[22px] text-white mt-8 mb-2">I tuoi diritti</h3>
-        <p>Hai diritto di accesso, rettifica e cancellazione dei dati (Diritto all'Oblio). Scrivi alla nostra PEC o all'indirizzo <a href="mailto:contatti@virtualbnb.it" className="text-gold-500 border-b border-gold-500/30">contatti@virtualbnb.it</a> per far valere i tuoi diritti.</p>
-        <p className="font-mono text-[12px] text-dark-200 mt-10 pt-6 border-t border-gold-500/15">Insolito Experiences · P.IVA IT14379200968 · REA: [Il tuo REA]</p>
+        <p className="text-sm text-dark-300 mb-6">Ultimo aggiornamento: 23 Agosto 2026</p>
+
+        <h3 className="font-serif text-[20px] text-white mt-6 mb-2">1. Titolare del trattamento</h3>
+        <p>Insolito Experiences di Jara Lloctun Michael Sergio, P.IVA 14379200968, con sede in Via Uboldo n. 8, 20063 Cernusco sul Naviglio (MI). Per qualsiasi richiesta relativa al trattamento dei tuoi dati personali: <a href={`mailto:${EMAIL}`} className="text-gold-500 border-b border-gold-500/30">{EMAIL}</a>.</p>
+
+        <h3 className="font-serif text-[20px] text-white mt-8 mb-2">2. Dati raccolti</h3>
+        <ul className="list-disc pl-5 space-y-2">
+          <li>Dati di contatto (nome, email, telefono) forniti tramite il form "Analisi Gratuita" o altri moduli del sito</li>
+          <li>Dati sull'immobile forniti da proprietari interessati alla gestione (indirizzo, tipologia, stato attuale)</li>
+          <li>Dati di account per proprietari registrati (credenziali gestite tramite il nostro fornitore di autenticazione)</li>
+          <li>Conversazioni WhatsApp con ospiti e proprietari, gestite tramite il nostro assistente virtuale</li>
+          <li>Dati tecnici (indirizzo IP, log di accesso) per finalità di sicurezza</li>
+        </ul>
+
+        <h3 className="font-serif text-[20px] text-white mt-8 mb-2">3. Finalità del trattamento</h3>
+        <ul className="list-disc pl-5 space-y-2">
+          <li>Fornire il servizio di gestione della proprietà richiesto</li>
+          <li>Rispondere a richieste di informazioni e qualificare richieste di gestione</li>
+          <li>Gestire la comunicazione operativa con ospiti tramite assistente virtuale basato su intelligenza artificiale</li>
+          <li>Adempiere a obblighi contrattuali e fiscali</li>
+        </ul>
+
+        <h3 className="font-serif text-[20px] text-white mt-8 mb-2">4. Uso di intelligenza artificiale</h3>
+        <p>Per rispondere automaticamente a richieste su WhatsApp e nella dashboard, utilizziamo un assistente basato sull'API di Anthropic (Claude). I messaggi che scambi con l'assistente vengono elaborati da questo fornitore terzo secondo la sua <a href="https://www.anthropic.com/legal/privacy" target="_blank" rel="noopener noreferrer" className="text-gold-500 border-b border-gold-500/30">informativa privacy</a> al solo fine di generare una risposta. Anthropic non utilizza i dati inviati tramite API commerciale per addestrare i propri modelli.</p>
+
+        <h3 className="font-serif text-[20px] text-white mt-8 mb-2">5. Conservazione dei dati</h3>
+        <p>I dati sono conservati per il tempo necessario a fornire il servizio e adempiere agli obblighi di legge (tipicamente 10 anni per la documentazione fiscale). I lead non convertiti in clienti vengono conservati per un massimo di 24 mesi, salvo richiesta di cancellazione anticipata.</p>
+
+        <h3 className="font-serif text-[20px] text-white mt-8 mb-2">6. I tuoi diritti</h3>
+        <p>Ai sensi degli artt. 15-22 del GDPR, hai diritto di accesso, rettifica, cancellazione, limitazione del trattamento, portabilità dei dati e opposizione. Per esercitarli scrivi a <a href={`mailto:${EMAIL}`} className="text-gold-500 border-b border-gold-500/30">{EMAIL}</a>. Hai inoltre diritto di proporre reclamo al Garante per la Protezione dei Dati Personali (<a href="https://www.garanteprivacy.it" target="_blank" rel="noopener noreferrer" className="text-gold-500 border-b border-gold-500/30">garanteprivacy.it</a>).</p>
+
+        <h3 className="font-serif text-[20px] text-white mt-8 mb-2">7. Fornitori terzi (sub-responsabili del trattamento)</h3>
+        <table className="w-full text-sm mt-4 border-collapse">
+          <thead><tr className="border-b border-dark-600"><th className="text-left py-2 text-dark-300 font-normal">Fornitore</th><th className="text-left py-2 text-dark-300 font-normal">Finalità</th></tr></thead>
+          <tbody>
+            <tr className="border-b border-dark-700"><td className="py-2 pr-4">Supabase Inc.</td><td className="py-2 text-dark-200">Hosting database e autenticazione</td></tr>
+            <tr className="border-b border-dark-700"><td className="py-2 pr-4">Vercel Inc.</td><td className="py-2 text-dark-200">Hosting applicazione</td></tr>
+            <tr className="border-b border-dark-700"><td className="py-2 pr-4">Anthropic PBC</td><td className="py-2 text-dark-200">Elaborazione AI delle conversazioni</td></tr>
+            <tr><td className="py-2 pr-4">Meta Platforms Ireland Ltd.</td><td className="py-2 text-dark-200">Infrastruttura di messaggistica WhatsApp Business</td></tr>
+          </tbody>
+        </table>
+
+        <p className="font-mono text-[12px] text-dark-400 mt-10 pt-6 border-t border-gold-500/15">Insolito Experiences di Jara Lloctun Michael Sergio · P.IVA IT14379200968 · CF JRLMHL86P14Z611F · Via Uboldo n. 8, 20063 Cernusco sul Naviglio (MI)</p>
       </>
     ),
   },
@@ -30,14 +67,27 @@ const LEGAL = {
     title: 'Termini di Servizio',
     content: (
       <>
-        <p>Le presenti Condizioni Generali regolano l'accesso e l'utilizzo del sito web VirtualBNB.it, gestito da Insolito Experiences.</p>
-        <h3 className="font-serif text-[22px] text-white mt-8 mb-2">1. Natura dei Servizi e Simulazioni AI</h3>
-        <p>VirtualBNB fornisce servizi di Property Management avanzato. Le proiezioni di revenue mostrate sul sito ("Analisi Gratuita") sono stime basate sull'analisi algoritmica del mercato. Sebbene altamente precise, non costituiscono in alcun modo una garanzia contrattuale di rendimento futuro, salvo dove esplicitamente indicato dal contratto "Guaranteed Yield".</p>
-        <h3 className="font-serif text-[22px] text-white mt-8 mb-2">2. Contrattualistica e "Guaranteed Yield"</h3>
-        <p>L'effettiva presa in gestione di un immobile e l'eventuale erogazione della "Rendita Garantita" (Guaranteed Yield) sono subordinate a un'insindacabile analisi di fattibilità da parte della direzione e alla successiva firma di un formale contratto di Property Management.</p>
-        <h3 className="font-serif text-[22px] text-white mt-8 mb-2">3. Proprietà Intellettuale</h3>
-        <p>I contenuti del sito, il marchio, il logo e le interfacce visive sono di esclusiva proprietà intellettuale di Michael Jara / Insolito Experiences. È severamente vietata la riproduzione, anche parziale.</p>
-        <p className="font-mono text-[12px] text-dark-200 mt-10 pt-6 border-t border-gold-500/15">Insolito Experiences · P.IVA IT14379200968 · REA: [Il tuo REA]</p>
+        <p className="text-sm text-dark-300 mb-6">Ultimo aggiornamento: 23 Agosto 2026</p>
+
+        <h3 className="font-serif text-[20px] text-white mt-6 mb-2">1. Il servizio</h3>
+        <p>VirtualBNB, un servizio di Insolito Experiences di Jara Lloctun Michael Sergio (P.IVA 14379200968), offre gestione professionale di affitti brevi per conto di proprietari immobiliari, inclusa comunicazione con gli ospiti tramite assistente virtuale.</p>
+
+        <h3 className="font-serif text-[20px] text-white mt-8 mb-2">2. Accesso e account</h3>
+        <p>L'accesso alla piattaforma per i proprietari avviene solo su invito. Sei responsabile della riservatezza delle tue credenziali di accesso e di ogni attività svolta tramite il tuo account.</p>
+
+        <h3 className="font-serif text-[20px] text-white mt-8 mb-2">3. Rapporto contrattuale con i proprietari</h3>
+        <p>I termini economici specifici (commissioni, modalità di rendicontazione, durata dell'incarico) sono regolati da un contratto di gestione separato, sottoscritto individualmente con ciascun proprietario. I presenti Termini regolano esclusivamente l'uso della piattaforma digitale.</p>
+
+        <h3 className="font-serif text-[20px] text-white mt-8 mb-2">4. Limitazione di responsabilità sull'assistente AI</h3>
+        <p>L'assistente virtuale fornisce informazioni operative di base (orari, regole della casa, informazioni sulla zona). Le risposte sono generate automaticamente e, per quanto curate, possono contenere imprecisioni. Per richieste urgenti o di natura contrattuale, contattaci direttamente. Non ci assumiamo responsabilità per decisioni prese esclusivamente sulla base di una risposta automatica dell'assistente.</p>
+
+        <h3 className="font-serif text-[20px] text-white mt-8 mb-2">5. Recesso</h3>
+        <p>Il proprietario può richiedere la cessazione dell'incarico secondo i termini previsti dal contratto di gestione individuale. La chiusura dell'account sulla piattaforma non costituisce di per sé recesso dal contratto di gestione.</p>
+
+        <h3 className="font-serif text-[20px] text-white mt-8 mb-2">6. Legge applicabile</h3>
+        <p>I presenti Termini sono regolati dalla legge italiana. Per ogni controversia è competente il foro di Milano, salvo diversa previsione inderogabile a tutela del consumatore.</p>
+
+        <p className="font-mono text-[12px] text-dark-400 mt-10 pt-6 border-t border-gold-500/15">Insolito Experiences di Jara Lloctun Michael Sergio · P.IVA IT14379200968 · Via Uboldo n. 8, 20063 Cernusco sul Naviglio (MI) · <a href={`mailto:${EMAIL}`} className="text-gold-500">{EMAIL}</a></p>
       </>
     ),
   },
@@ -45,14 +95,24 @@ const LEGAL = {
     title: 'Cookie Policy',
     content: (
       <>
-        <p>Questo sito fa uso di cookie tecnici strettamente necessari e di tracciamento di terze parti per analizzare in modo anonimo le visite e migliorare il servizio.</p>
-        <h3 className="font-serif text-[22px] text-white mt-8 mb-2">Cookie Tecnici</h3>
-        <p>Necessari per il funzionamento basilare del sito (es. per ricordare le tue preferenze sulla privacy stessa). Non richiedono consenso preventivo.</p>
-        <h3 className="font-serif text-[22px] text-white mt-8 mb-2">Cookie Analitici e di Profilazione</h3>
-        <p>Previo tuo esplicito consenso, utilizziamo strumenti (es. Meta Pixel o Google Analytics) per comprendere le interazioni con la piattaforma. I dati raccolti aiutano a ottimizzare l'interfaccia e mostrare comunicazioni pertinenti.</p>
-        <h3 className="font-serif text-[22px] text-white mt-8 mb-2">Disattivazione</h3>
-        <p>Puoi ritirare il consenso in qualsiasi momento o gestire le tue preferenze direttamente dalle impostazioni del tuo browser web.</p>
-        <p className="font-mono text-[12px] text-dark-200 mt-10 pt-6 border-t border-gold-500/15">Insolito Experiences · P.IVA IT14379200968 · REA: [Il tuo REA]</p>
+        <p className="text-sm text-dark-300 mb-6">Ultimo aggiornamento: 23 Agosto 2026</p>
+
+        <p>Piccoli file salvati sul tuo dispositivo che permettono al sito di funzionare correttamente e, se acconsenti, di raccogliere statistiche d'uso.</p>
+
+        <h3 className="font-serif text-[20px] text-white mt-8 mb-4">Cookie utilizzati</h3>
+        <table className="w-full text-sm border-collapse">
+          <thead><tr className="border-b border-dark-600"><th className="text-left py-2 text-dark-300 font-normal">Tipo</th><th className="text-left py-2 text-dark-300 font-normal">Finalità</th><th className="text-left py-2 text-dark-300 font-normal">Consenso</th></tr></thead>
+          <tbody>
+            <tr className="border-b border-dark-700"><td className="py-2 pr-4">Tecnici / di sessione</td><td className="py-2 pr-4 text-dark-200">Mantenere l'accesso effettuato (Supabase Auth)</td><td className="py-2 text-green-400 text-xs">Non richiesto</td></tr>
+            <tr className="border-b border-dark-700"><td className="py-2 pr-4">Preferenze</td><td className="py-2 pr-4 text-dark-200">Ricordare le scelte sull'interfaccia</td><td className="py-2 text-green-400 text-xs">Non richiesto</td></tr>
+            <tr><td className="py-2 pr-4">Analitici</td><td className="py-2 pr-4 text-dark-200">Statistiche d'uso aggregate e anonime</td><td className="py-2 text-gold-500 text-xs">Richiesto</td></tr>
+          </tbody>
+        </table>
+
+        <h3 className="font-serif text-[20px] text-white mt-8 mb-2">Come gestire i cookie</h3>
+        <p>Puoi modificare le tue preferenze in qualsiasi momento tramite il banner cookie presente sul sito, oppure dalle impostazioni del tuo browser.</p>
+
+        <p className="font-mono text-[12px] text-dark-400 mt-10 pt-6 border-t border-gold-500/15">Insolito Experiences di Jara Lloctun Michael Sergio · P.IVA IT14379200968 · <a href={`mailto:${EMAIL}`} className="text-gold-500">{EMAIL}</a></p>
       </>
     ),
   },
