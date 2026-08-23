@@ -6,9 +6,19 @@ const { createClient } = require('@supabase/supabase-js');
 const { generateWithTools } = require('./lib/aiService');
 const { ownerToolDefinitions, ownerToolHandlers } = require('./lib/ownerTools');
 
-// ─── Rate limiting + sanitizzazione ─────────────────────────────────────────
-// Vedi commento in adminChat.js. Map() non è affidabile su serverless.
-// TODO produzione: Upstash Redis per rate limiting persistente cross-invocation.
+// ─── Rate limiting con Upstash Redis ──────────────────────────────────────────
+const { Ratelimit } = require('@upstash/ratelimit');
+const { Redis } = require('@upstash/redis');
+
+// Inizializza Redis e il limiter (15 richieste al minuto per IP)
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN,
+});
+const ratelimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(15, '1 m'),
+});
 
 const INJECTION_PATTERNS = [
   /ignora.{0,30}(istruzione|regola|prompt|sistema)/i,
@@ -58,9 +68,10 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  // Rate limiting: controlla header Vercel Firewall
-  const rateLimitRemaining = req.headers['x-ratelimit-remaining'];
-  if (rateLimitRemaining !== undefined && parseInt(rateLimitRemaining) <= 0) {
+  // Rate limiting: controllo IP tramite Upstash Redis (15 req/minuto)
+  const ip = req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'anonymous';
+  const { success } = await ratelimit.limit(`owner_${ip}`);
+  if (!success) {
     return res.status(429).json({ error: 'Troppe richieste. Attendi un minuto e riprova.' });
   }
 

@@ -5,17 +5,19 @@ const { createClient } = require('@supabase/supabase-js');
 const { generateWithTools } = require('./lib/aiService');
 const { adminToolDefinitions, adminToolHandlers } = require('./lib/adminTools');
 
-// ─── Rate limiting stateless (basato su Vercel Edge headers) ────────────────
-// Un Map() in-memory non funziona su Vercel Functions serverless: ogni invocazione
-// può girare su un'istanza diversa. Soluzione corretta a costo zero:
-// Vercel aggiunge automaticamente x-ratelimit-* headers tramite Vercel Firewall.
-// Come fallback, usiamo un check per IP con finestra temporale nel body della risposta.
-// Per un enforcement reale in produzione: usare Upstash Redis (vedere commento sotto).
-//
-// TODO produzione: npm install @upstash/ratelimit @upstash/redis
-// import { Ratelimit } from '@upstash/ratelimit';
-// import { Redis } from '@upstash/redis';
-// const ratelimit = new Ratelimit({ redis: Redis.fromEnv(), limiter: Ratelimit.slidingWindow(15, '1 m') });
+// ─── Rate limiting con Upstash Redis ──────────────────────────────────────────
+const { Ratelimit } = require('@upstash/ratelimit');
+const { Redis } = require('@upstash/redis');
+
+// Inizializza Redis e il limiter (15 richieste al minuto per IP)
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN,
+});
+const ratelimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(15, '1 m'),
+});
 
 // ─── Sanitizzazione anti-injection ───────────────────────────────────────────
 // Filtra sia caratteri di controllo che pattern testuali comuni di prompt injection.
@@ -72,11 +74,10 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  // Rate limiting: controlla il header Vercel Firewall se disponibile,
-  // altrimenti blocca se la richiesta arriva da un IP con troppe chiamate veloci.
-  // Nota: per enforcement garantito in produzione → Upstash Redis.
-  const rateLimitRemaining = req.headers['x-ratelimit-remaining'];
-  if (rateLimitRemaining !== undefined && parseInt(rateLimitRemaining) <= 0) {
+  // Rate limiting: controllo IP tramite Upstash Redis (15 req/minuto)
+  const ip = req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'anonymous';
+  const { success } = await ratelimit.limit(`admin_${ip}`);
+  if (!success) {
     return res.status(429).json({ error: 'Troppe richieste. Attendi un minuto e riprova.' });
   }
 
