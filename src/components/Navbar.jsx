@@ -13,7 +13,7 @@ const scrollTo = (id) => {
   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
 
-export default function Navbar() {
+export default function Navbar({ isGuest = false }) {
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
 
@@ -27,12 +27,13 @@ export default function Navbar() {
     <>
       <nav className={`vbnb-nav${scrolled ? ' scrolled' : ''}`}>
         {/* Logo */}
-        <a href="#hero" onClick={(e) => { e.preventDefault(); scrollTo('hero') }} className="nav-logo">
+        <Link to={isGuest ? "/ospiti" : "/"} className="nav-logo">
           VIRTUAL<span>BNB</span>
-        </a>
+        </Link>
 
         {/* Desktop links */}
-        <ul className="nav-links">
+        {!isGuest && (
+          <ul className="nav-links">
           {navLinks.map((link) => (
             <li key={link.id}>
               <a
@@ -44,21 +45,49 @@ export default function Navbar() {
             </li>
           ))}
         </ul>
+        )}
 
         {/* Desktop CTAs */}
         <div className="flex items-center gap-3">
           <Link
             to="/login"
-            className="font-sans text-[12px] tracking-[0.12em] uppercase text-dark-200 hover:text-white transition-colors px-3 py-2"
+            className="hidden md:block font-sans text-[12px] tracking-[0.12em] uppercase text-dark-200 hover:text-white transition-colors px-3 py-2"
           >
             Accedi
           </Link>
-          <button
-            className="nav-cta"
-            onClick={() => scrollTo('analisi')}
-          >
-            Analisi Gratuita
-          </button>
+          {isGuest ? (
+            <>
+              <a
+                href="https://book.virtualbnb.it"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="nav-cta"
+              >
+                Cerca Casa
+              </a>
+              <Link
+                to="/"
+                className="font-sans text-[11px] tracking-[0.12em] uppercase text-gold-500 hover:text-gold-400 transition-colors ml-4 hidden lg:block"
+              >
+                Proprietari?
+              </Link>
+            </>
+          ) : (
+            <>
+              <button
+                className="nav-cta"
+                onClick={() => scrollTo('analisi')}
+              >
+                Analisi Gratuita
+              </button>
+              <Link
+                to="/ospiti"
+                className="font-sans text-[11px] tracking-[0.12em] uppercase text-gold-500 hover:text-gold-400 transition-colors ml-4 hidden lg:block"
+              >
+                Ospiti? Prenota
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile burger */}
@@ -83,7 +112,7 @@ export default function Navbar() {
           >
             ✕
           </button>
-          {navLinks.map((link) => (
+          {!isGuest && navLinks.map((link) => (
             <button
               key={link.id}
               className="font-serif text-[28px] text-white hover:text-gold-400 transition-colors"
@@ -92,10 +121,27 @@ export default function Navbar() {
               {link.label}
             </button>
           ))}
+          {isGuest ? (
+            <Link
+              to="/"
+              onClick={() => setMobileOpen(false)}
+              className="font-serif text-[28px] text-white hover:text-gold-400 transition-colors"
+            >
+              Area Proprietari
+            </Link>
+          ) : (
+            <Link
+              to="/ospiti"
+              onClick={() => setMobileOpen(false)}
+              className="font-serif text-[28px] text-white hover:text-gold-400 transition-colors"
+            >
+              Ospiti / Prenota
+            </Link>
+          )}
           <Link
             to="/login"
             onClick={() => setMobileOpen(false)}
-            className="font-sans text-[13px] tracking-[0.15em] uppercase text-dark-200 hover:text-white transition-colors"
+            className="font-sans text-[13px] tracking-[0.15em] uppercase text-dark-200 hover:text-white transition-colors mt-8"
           >
             Accedi
           </Link>

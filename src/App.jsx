@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'r
 import { useEffect } from 'react'
 import { supabase } from './lib/supabaseClient'
 import Landing from './pages/Landing'
+import GuestLanding from './pages/GuestLanding'
 import Login from './pages/auth/Login'
 import ForgotPassword from './pages/auth/ForgotPassword'
 import UpdatePassword from './pages/auth/UpdatePassword'
@@ -42,6 +43,7 @@ export default function App() {
       <AuthListener />
       <Routes>
         <Route path="/" element={<Landing />} />
+        <Route path="/ospiti" element={<GuestLanding />} />
         <Route path="/login" element={<Login />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/update-password" element={<UpdatePassword />} />
