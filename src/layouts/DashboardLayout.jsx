@@ -22,6 +22,7 @@ export default function DashboardLayout() {
     { icon: <Settings size={20} />, label: 'Impostazioni', path: '/admin/settings' },
   ] : [
     { icon: <LayoutDashboard size={20} />, label: 'Le mie proprietà', path: '/portal' },
+    { icon: <Settings size={20} />, label: 'Impostazioni', path: '/portal/settings' },
   ]
 
   useEffect(() => {

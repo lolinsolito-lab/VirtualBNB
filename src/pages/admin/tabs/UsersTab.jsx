@@ -120,6 +120,7 @@ export default function UsersTab() {
                 <tr>
                   <th className="p-4 border-b border-dark-700">ID</th>
                   <th className="p-4 border-b border-dark-700">Nome</th>
+                  <th className="p-4 border-b border-dark-700">Email</th>
                   <th className="p-4 border-b border-dark-700">Data Registrazione</th>
                   <th className="p-4 border-b border-dark-700 text-right">Azioni</th>
                 </tr>
@@ -127,13 +128,14 @@ export default function UsersTab() {
               <tbody className="text-white">
                 {users.length === 0 ? (
                   <tr>
-                    <td colSpan="4" className="p-8 text-center text-dark-200">Nessun proprietario trovato.</td>
+                    <td colSpan="5" className="p-8 text-center text-dark-200">Nessun proprietario trovato.</td>
                   </tr>
                 ) : (
                   users.map((u) => (
                     <tr key={u.id} className="border-b border-dark-700/50 hover:bg-dark-700/30 transition-colors">
                       <td className="p-4 font-mono text-[11px] text-dark-300">{u.id.substring(0,8)}...</td>
                       <td className="p-4">{u.full_name}</td>
+                      <td className="p-4 text-dark-200 font-mono text-[12px]">{u.email || '-'}</td>
                       <td className="p-4 text-dark-200">{new Date(u.created_at).toLocaleDateString('it-IT')}</td>
                       <td className="p-4 text-right">
                         <a 

@@ -14,6 +14,8 @@ import UsersTab from './pages/admin/tabs/UsersTab'
 import PropertiesTab from './pages/admin/tabs/PropertiesTab'
 import FinancesTab from './pages/admin/tabs/FinancesTab'
 import DocumentsTab from './pages/admin/tabs/DocumentsTab'
+import SettingsTab from './pages/admin/tabs/SettingsTab'
+import OwnerSettingsTab from './pages/owner/tabs/OwnerSettingsTab'
 
 function AuthListener() {
   const navigate = useNavigate()
@@ -52,12 +54,12 @@ export default function App() {
           <Route path="/admin/properties" element={<PropertiesTab />} />
           <Route path="/admin/finances" element={<FinancesTab />} />
           <Route path="/admin/documenti" element={<DocumentsTab />} />
-          <Route path="/admin/settings" element={<div className="p-10 text-white font-serif text-[24px]">Impostazioni (Coming Soon)</div>} />
+          <Route path="/admin/settings" element={<SettingsTab />} />
           
           {/* Owner Portal Routes */}
           <Route path="/portal" element={<OwnerDashboard />} />
           <Route path="/portal/reports" element={<Navigate to="/portal" replace />} />
-          <Route path="/portal/settings" element={<Navigate to="/portal" replace />} />
+          <Route path="/portal/settings" element={<OwnerSettingsTab />} />
         </Route>
       </Routes>
     </Router>
