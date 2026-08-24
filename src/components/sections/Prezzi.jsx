@@ -47,7 +47,7 @@ const plans = [
     name: 'Premium',
     desc: 'Per appartamenti luxury o investitori multi-property. Servizio white-glove.',
     price: '€650',
-    priceNote: '/mese fisso',
+    priceNote: '/mese per immobile',
     setup: 'Zero commissioni sul revenue',
     features: [
       'Revenue management proattivo umano',

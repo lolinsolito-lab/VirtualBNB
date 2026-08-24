@@ -89,7 +89,7 @@ const TYPE_MULTIPLIER = {
 }
 
 // Soglie basate sui tier reali pubblicati in Prezzi (non etichette inventate):
-// Essenziale 25% revenue · Smart 28% revenue (tier più scelto) · Premium €650/mese fisso, zero commissioni.
+// Essenziale 25% revenue · Smart 28% revenue (tier più scelto) · Premium €650/mese ad immobile, zero commissioni.
 // Break-even Smart→Premium: 650 / 0.28 ≈ €2.320/mese.
 function suggestTier(monthlyRevenue) {
   if (monthlyRevenue >= 2300) return 'Premium'

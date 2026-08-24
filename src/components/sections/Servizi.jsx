@@ -11,9 +11,9 @@ const features = [
   },
   {
     num: '02', icon: '↗',
-    title: 'Direct booking engine',
-    desc: 'Ogni prenotazione diretta su VirtualBNB risparmia il 15-17% di commissione Airbnb. Quel risparmio si divide tra proprietario e noi. Tutti vincono — tranne le OTA.',
-    badge: 'Revenue aggiuntivo',
+    title: 'Direct Booking Engine',
+    desc: 'Eliminiamo il 15-18% di commissioni Airbnb/Booking. Il risparmio netto viene diviso esattamente a metà (50/50): su una prenotazione da €150, tu intaschi 10,58€ extra in automatico.',
+    badge: '50/50 Profit Split',
   },
   {
     num: '03', icon: '◎',
