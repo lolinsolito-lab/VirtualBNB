@@ -219,9 +219,6 @@ export default function Footer({ isGuest = false }) {
               ))}
             </div>
           </div>
-            P.IVA IT14379200968 <br />
-            PEC: virtualbnb@pec.it · Milano, Italia
-          </div>
         </div>
       </footer>
 
