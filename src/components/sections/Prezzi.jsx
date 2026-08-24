@@ -38,7 +38,6 @@ const plans = [
       'AI WhatsApp per il proprietario',
       'Manutenzione proattiva inclusa (max €100)',
       'Distribuzione Premium Multi-Canale',
-      'Opzione Guaranteed Income (Protezione attiva)',
     ],
     featured: true,
     cta: 'Scegli Smart — Il più Popolare',

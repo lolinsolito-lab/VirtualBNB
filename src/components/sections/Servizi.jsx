@@ -5,8 +5,8 @@ const scrollTo = (id) => document.getElementById(id)?.scrollIntoView({ behavior:
 const features = [
   {
     num: '01', icon: '⟳',
-    title: 'AI WhatsApp per i proprietari',
-    desc: 'Scrivi qualsiasi domanda sul tuo appartamento via WhatsApp — in linguaggio naturale. "Quanto ho guadagnato questa settimana?" Risposta in 3 secondi. Nessun PM in Italia lo fa.',
+    title: 'AI Concierge nel tuo Owner Portal',
+    desc: 'Fai qualsiasi domanda sui tuoi immobili in linguaggio naturale, direttamente nella dashboard — "Quanto ho guadagnato questa settimana?" Risposta immediata, senza aspettare fine mese. Nessun PM in Italia lo offre così.',
     badge: 'Esclusivo VirtualBNB',
   },
   {
@@ -112,32 +112,25 @@ export default function Servizi() {
             ))}
           </div>
 
-          {/* Guaranteed Yield banner */}
+          {/* Nota trasparenza — sostituisce il vecchio banner "Rendita
+              Stabilizzata / Guaranteed Income". Non è più trattata come un
+              prodotto premium a sé: è la stessa logica di compenso a
+              percentuale già descritta sopra, resa esplicita per chiarezza.
+              Zero soglie, zero meccanismi di "integrazione" — solo commissione
+              sul revenue realmente generato. */}
           <motion.div
             initial={{ opacity: 0, y: 32 }} whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }} transition={{ duration: 0.8, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-            className="bg-dark-900 p-12 md:p-16 flex items-center justify-between gap-12 flex-wrap"
+            className="bg-dark-900 p-12 md:p-16"
             style={{ boxShadow: '0 8px 40px rgba(0,0,0,0.25)' }}
           >
-            <div>
-              <p className="font-mono text-[12px] tracking-[0.2em] uppercase text-gold-500 mb-4">Prodotto premium</p>
-              <h3 className="font-serif text-[32px] font-normal text-white mb-4">
-                Guaranteed Income — Protezione Flessibile
-              </h3>
-              <p className="font-sans font-light text-[18px] text-dark-100 leading-relaxed max-w-2xl mb-3">
-                Un sistema a garanzia variabile simile a un'assicurazione: la protezione dell'incasso si attiva solo quando l'immobile è occupato e si mette in pausa quando è vuoto. Abbattiamo i costi fissi e massimizziamo le tue entrate nette in totale sicurezza.
-              </p>
-              <p className="font-sans text-[11px] uppercase tracking-widest text-gold-500/60 mt-2">
-                *Opzione Premium soggetta ad analisi e valutazione del potenziale dell'immobile.
-              </p>
-            </div>
-            <button
-              onClick={() => scrollTo('analisi')}
-              className="whitespace-nowrap font-sans text-[13px] font-medium tracking-[0.15em] uppercase bg-gold-500 text-black px-10 py-5 hover:bg-gold-400 transition-all duration-300 flex-shrink-0 hover:-translate-y-0.5"
-              style={{ boxShadow: '0 4px 20px rgba(184,150,62,0.3)' }}
-            >
-              Scopri se sei idoneo →
-            </button>
+            <p className="font-mono text-[12px] tracking-[0.2em] uppercase text-gold-500 mb-4">Come funziona il pagamento</p>
+            <h3 className="font-serif text-[32px] font-normal text-white mb-4">
+              Guadagni solo su quello che generiamo davvero.
+            </h3>
+            <p className="font-sans font-light text-[18px] text-dark-100 leading-relaxed max-w-2xl">
+              Finché il tuo immobile è online e attivo sui canali di prenotazione, ricevi la tua quota secondo il tier scelto — nessuna trattenuta se non c'è revenue reale da dividere. Se l'immobile è offline (manutenzione, pausa, fuori mercato per tua scelta), non è dovuta alcuna commissione: né a te, né a noi.
+            </p>
           </motion.div>
         </div>
       </div>
