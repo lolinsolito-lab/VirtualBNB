@@ -12,6 +12,7 @@ export default function PropertiesTab() {
   const [address, setAddress] = useState('')
   const [type, setType] = useState('Bilocale')
   const [ownerId, setOwnerId] = useState('')
+  const [connections, setConnections] = useState({ lodgify_property_id: null, pricelabs_connected: false })
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState(null)
 
@@ -58,7 +59,9 @@ export default function PropertiesTab() {
           owner_id: ownerId,
           title,
           address,
-          type
+          type,
+          lodgify_property_id: connections.lodgify_property_id,
+          pricelabs_connected: connections.pricelabs_connected
         }
       ])
 
@@ -68,6 +71,7 @@ export default function PropertiesTab() {
       setMessage({ type: 'success', text: 'Immobile salvato con successo!' })
       setTitle('')
       setAddress('')
+      setConnections({ lodgify_property_id: null, pricelabs_connected: false })
       loadData()
     }
     setSaving(false)
@@ -133,6 +137,8 @@ export default function PropertiesTab() {
             </div>
           </div>
           
+          <CollegamentiSection formData={connections} setFormData={setConnections} />
+          
           <div className="pt-4">
             <button 
               type="submit"
@@ -196,5 +202,39 @@ export default function PropertiesTab() {
         )}
       </div>
     </motion.div>
+  )
+}
+
+function CollegamentiSection({ formData, setFormData }) {
+  return (
+    <div className="border-t border-dark-700 pt-6 mt-6">
+      <h4 className="font-serif text-[18px] text-white mb-1">Collegamenti Esterni</h4>
+      <p className="font-sans text-dark-200 text-[13px] mb-5">
+        Compila solo dopo aver creato l'immobile anche su Lodgify — l'ID lo trovi nella sua scheda proprietà lì.
+      </p>
+
+      <div className="mb-5">
+        <label className="font-sans text-[11px] tracking-[0.15em] uppercase text-gold-500/80 block mb-2">
+          ID Proprietà Lodgify (opzionale)
+        </label>
+        <input
+          type="text"
+          value={formData.lodgify_property_id || ''}
+          onChange={(e) => setFormData({ ...formData, lodgify_property_id: e.target.value || null })}
+          placeholder="Es. 123456"
+          className="w-full bg-dark-900 border border-dark-700 focus:border-gold-500 text-white font-sans text-[14px] p-3 outline-none"
+        />
+      </div>
+
+      <label className="flex items-center gap-3 cursor-pointer">
+        <input
+          type="checkbox"
+          checked={formData.pricelabs_connected || false}
+          onChange={(e) => setFormData({ ...formData, pricelabs_connected: e.target.checked })}
+          className="w-4 h-4 accent-gold-500"
+        />
+        <span className="font-sans text-dark-100 text-[14px]">Pricing dinamico attivo su PriceLabs per questo immobile</span>
+      </label>
+    </div>
   )
 }

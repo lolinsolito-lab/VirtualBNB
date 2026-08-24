@@ -1,13 +1,53 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Euro, Calendar, CheckCircle, AlertCircle, Eye, ArrowLeft } from 'lucide-react'
+import { Euro, Calendar, CheckCircle, AlertCircle, Eye, ArrowLeft, Wifi, FileText, MapPin, Trash2, Key } from 'lucide-react'
 import { supabase } from '../../lib/supabaseClient'
 import { useSearchParams, Link } from 'react-router-dom'
 
+const labelClass = 'font-mono text-[11px] tracking-[0.15em] uppercase text-dark-200'
+const cardClass = 'bg-dark-800 border border-dark-700 p-8 rounded-lg'
+
+function PendingBadge({ text = 'In attesa di collegamento' }) {
+  return (
+    <span className="inline-flex items-center gap-2 font-mono text-[10px] tracking-[0.12em] uppercase text-dark-200/70 border border-dark-700 px-2.5 py-1">
+      <span className="w-1.5 h-1.5 rounded-full bg-dark-200/40" />
+      {text}
+    </span>
+  )
+}
+
+function ConnectedBadge({ text = 'Live' }) {
+  return (
+    <span className="inline-flex items-center gap-2 font-mono text-[10px] tracking-[0.12em] uppercase text-gold-500 border border-gold-500/30 px-2.5 py-1">
+      <span className="relative flex h-1.5 w-1.5">
+        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-gold-400 opacity-75" />
+        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-gold-500" />
+      </span>
+      {text}
+    </span>
+  )
+}
+
+const fmt = (n) => Number(n).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+
 export default function OwnerDashboard() {
   const [property, setProperty] = useState(null)
-  const [report, setReport] = useState(null)
+  const [bookings, setBookings] = useState([])
+  const [monthlyReport, setMonthlyReport] = useState(null)
   const [loading, setLoading] = useState(true)
+  
+  // Guest Guide State
+  const [guestGuide, setGuestGuide] = useState({
+    wifi_network: '',
+    wifi_password: '',
+    checkin_instructions: '',
+    house_rules: '',
+    garbage_rules: '',
+    parking_rules: ''
+  })
+  const [savingGuide, setSavingGuide] = useState(false)
+  const [guideMessage, setGuideMessage] = useState(null)
+
   const [searchParams] = useSearchParams()
   const previewOwnerId = searchParams.get('preview')
   const [isPreview, setIsPreview] = useState(false)
@@ -21,60 +61,55 @@ export default function OwnerDashboard() {
         return
       }
 
-      // Identify target user ID (Impersonation check)
       let targetUserId = authData.user.id
 
       if (previewOwnerId) {
-        // Verify current user is Admin before allowing impersonation
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', authData.user.id)
-          .single()
-
+        const { data: profile } = await supabase.from('profiles').select('role').eq('id', authData.user.id).single()
         if (profile?.role === 'admin') {
           targetUserId = previewOwnerId
           setIsPreview(true)
-          
-          // Get the impersonated owner's name
-          const { data: targetProfile } = await supabase
-            .from('profiles')
-            .select('full_name')
-            .eq('id', previewOwnerId)
-            .single()
-            
+          const { data: targetProfile } = await supabase.from('profiles').select('full_name').eq('id', previewOwnerId).single()
           if (targetProfile) setOwnerName(targetProfile.full_name)
         }
       }
 
-      // Fetch the target owner's property
-      const { data: propData } = await supabase
-        .from('properties')
-        .select('*')
-        .eq('owner_id', targetUserId)
-        .limit(1)
-        .single()
+      const { data: propData } = await supabase.from('properties').select('*').eq('owner_id', targetUserId).limit(1).single()
 
       if (propData) {
         setProperty(propData)
+        if (propData.guest_guide) {
+          setGuestGuide({ ...guestGuide, ...propData.guest_guide })
+        }
         
-        // Fetch the latest monthly report
-        const { data: repData } = await supabase
-          .from('monthly_reports')
-          .select('*')
-          .eq('property_id', propData.id)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .single()
+        // Fetch real data
+        const { data: bData } = await supabase.from('bookings').select('*').eq('property_id', propData.id).order('checkin', { ascending: true })
+        if (bData) setBookings(bData)
           
-        if (repData) setReport(repData)
+        const { data: repData } = await supabase.from('monthly_reports').select('*').eq('property_id', propData.id).order('created_at', { ascending: false }).limit(1).maybeSingle()
+        if (repData) setMonthlyReport(repData)
       }
-      
       setLoading(false)
     }
 
     loadData()
   }, [previewOwnerId])
+
+  const saveGuestGuide = async () => {
+    setSavingGuide(true)
+    setGuideMessage(null)
+    const { error } = await supabase.from('properties').update({ guest_guide: guestGuide }).eq('id', property.id)
+    if (error) {
+      setGuideMessage({ type: 'error', text: 'Errore durante il salvataggio.' })
+    } else {
+      setGuideMessage({ type: 'success', text: 'Manuale aggiornato! Ora è a disposizione dei tuoi ospiti.' })
+      setTimeout(() => setGuideMessage(null), 4000)
+    }
+    setSavingGuide(false)
+  }
+
+  const handleGuideChange = (e) => {
+    setGuestGuide({ ...guestGuide, [e.target.name]: e.target.value })
+  }
 
   if (loading) return <div className="p-10 text-white font-sans">Caricamento dati dal database...</div>
 
@@ -88,9 +123,7 @@ export default function OwnerDashboard() {
         )}
         <AlertCircle size={48} className="text-gold-500 mx-auto mb-4" />
         <h2 className="font-serif text-[24px] text-white mb-2">Nessun immobile assegnato</h2>
-        <p className="font-sans text-[15px] text-dark-200 mb-6">
-          L'amministrazione non ha ancora collegato un immobile a questo profilo.
-        </p>
+        <p className="font-sans text-[15px] text-dark-200 mb-6">L'amministrazione non ha ancora collegato un immobile a questo profilo.</p>
         {isPreview && (
           <Link to="/admin" className="inline-flex items-center gap-2 font-sans text-[13px] text-white bg-dark-700 px-4 py-2 hover:bg-dark-600 transition-colors rounded">
             <ArrowLeft size={16} /> Torna al CRM
@@ -100,95 +133,220 @@ export default function OwnerDashboard() {
     )
   }
 
+  const lodgifyConnected = Boolean(property?.lodgify_property_id)
+  const pricelabsConnected = Boolean(property?.pricelabs_connected)
+  const upcomingBookings = bookings.filter((b) => new Date(b.checkin) >= new Date())
+  const sourceBreakdown = bookings.reduce((acc, b) => {
+    acc[b.source] = (acc[b.source] || 0) + 1
+    return acc
+  }, {})
+  const totalBookingsForSource = Object.values(sourceBreakdown).reduce((a, b) => a + b, 0)
+
   return (
-    <div className="max-w-5xl mx-auto">
+    <div className="max-w-[1100px] mx-auto px-6 py-10">
       {isPreview && (
-        <div className="bg-gold-500 text-black px-4 py-3 rounded-lg mb-6 flex justify-between items-center">
-          <div className="flex items-center gap-2 font-sans text-[13px] font-medium uppercase tracking-wider">
+        <div className="bg-gold-500 text-black px-6 py-4 mb-8 flex items-center justify-between flex-wrap gap-3 rounded-lg">
+          <span className="font-mono text-[12px] tracking-[0.12em] uppercase flex items-center gap-2">
             <Eye size={16} /> Modalità Anteprima: stai visualizzando come {ownerName}
-          </div>
-          <Link to="/admin" className="font-sans text-[12px] bg-black text-white px-4 py-1.5 hover:bg-dark-800 transition-colors">
+          </span>
+          <Link to="/admin" className="bg-black text-white font-mono text-[11px] tracking-[0.1em] uppercase px-4 py-2 rounded">
             Chiudi Anteprima
           </Link>
         </div>
       )}
 
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-        <h1 className="font-serif text-[32px] font-light text-white mb-2">{property.title}</h1>
-        <p className="font-sans text-[15px] text-dark-200 mb-10">{property.address} — {property.type}</p>
+      {/* Header proprietà */}
+      <div className="mb-10">
+        <h1 className="font-serif text-[36px] text-white mb-1">{property.title}</h1>
+        <p className="font-sans text-dark-200">{property.address} — {property.type}</p>
+      </div>
 
-        {/* Highlight Card */}
-        <div className="bg-gold-500 text-black p-8 md:p-10 rounded-lg mb-10 relative overflow-hidden" style={{ boxShadow: '0 20px 50px rgba(184,150,62,0.15)' }}>
-          <div className="absolute right-0 top-0 w-64 h-64 bg-white/10 rounded-full blur-[80px]" />
-          <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
-            <div>
-              <p className="font-mono text-[12px] tracking-[0.2em] uppercase mb-2 opacity-80">Guadagno Netto Stimato {report ? `(${report.month_year})` : ''}</p>
-              <p className="font-serif text-[48px] md:text-[64px] leading-none mb-2">
-                € {report ? Number(report.net_payout).toLocaleString('it-IT', { minimumFractionDigits: 2 }) : '0,00'}
-              </p>
-              <p className="font-sans text-[14px] flex items-center gap-2">
-                <CheckCircle size={16} /> {report?.status === 'paid' ? 'Bonifico inviato' : 'In attesa di calcolo fine mese'}
-              </p>
-            </div>
-            {/* Tasto PDF nascosto temporaneamente:
-            <button className="font-sans text-[13px] font-medium tracking-[0.1em] uppercase bg-black text-white px-6 py-3 hover:bg-dark-800 transition-colors self-start md:self-auto disabled:opacity-50">
-              Scarica Report PDF
-            </button>
-            */}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
-          {/* Calendar Real Occupancy */}
-          <div className="bg-dark-800 border border-dark-700 p-8 rounded-lg">
-            <div className="flex items-center gap-3 mb-6">
-              <Calendar className="text-gold-500" size={24} />
-              <h3 className="font-serif text-[20px] text-white">Occupazione</h3>
-            </div>
-            <div className="flex items-end justify-between mb-2">
-              <span className="font-serif text-[32px] text-white">{report ? report.occupancy_rate : '--'}%</span>
-              <span className="font-sans text-[14px] text-dark-200 mb-2">{report ? `Rendiconto ${report.month_year}` : 'Nessun dato'}</span>
-            </div>
-            <div className="w-full bg-dark-900 h-2 rounded-full overflow-hidden">
-              <div className="bg-gold-500 h-full transition-all duration-1000" style={{ width: `${report ? report.occupancy_rate : 0}%` }} />
-            </div>
-            <p className="font-sans text-[13px] text-dark-200 mt-6">
-              Dato aggiornato calcolato sulle notti prenotate e bloccate per questo mese.
+      {/* Hero: Guadagno Netto */}
+      <div className="bg-gold-500 p-10 mb-8 rounded-lg relative overflow-hidden" style={{ boxShadow: '0 20px 50px rgba(184,150,62,0.15)' }}>
+        <div className="absolute right-0 top-0 w-64 h-64 bg-white/10 rounded-full blur-[80px]" />
+        <div className="relative z-10">
+          <p className={`${labelClass} text-black/60 mb-2`}>Guadagno Netto Stimato</p>
+          <p className="font-serif text-[52px] md:text-[64px] text-black leading-none mb-3">
+            € {monthlyReport ? fmt(monthlyReport.net_payout) : '0,00'}
+          </p>
+          {monthlyReport ? (
+            <p className="font-sans text-[14px] text-black/80 font-medium">Rendiconto {monthlyReport.month_year}</p>
+          ) : (
+            <p className="font-sans text-[14px] text-black/70 flex items-center gap-2">
+              <CheckCircle size={16} /> In attesa di calcolo fine mese
             </p>
-          </div>
+          )}
+        </div>
+      </div>
 
-          {/* Real Economics */}
-          <div className="bg-dark-800 border border-dark-700 p-8 rounded-lg">
-            <div className="flex items-center gap-3 mb-6">
-              <Euro className="text-gold-500" size={24} />
-              <h3 className="font-serif text-[20px] text-white">Spaccato Finanziario</h3>
-            </div>
-            {report ? (
-              <div className="space-y-4">
-                <div className="flex justify-between items-center pb-4 border-b border-dark-700">
-                  <span className="font-sans text-[14px] text-dark-200">Ricavi Lordi Prenotazioni</span>
-                  <span className="font-serif text-[18px] text-white">€ {Number(report.gross_revenue).toLocaleString('it-IT')}</span>
+      {/* Prossime Prenotazioni */}
+      <div className={`${cardClass} mb-8`}>
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="font-serif text-[20px] text-white flex items-center gap-3">📅 Prossime Prenotazioni</h3>
+          {lodgifyConnected ? <ConnectedBadge /> : <PendingBadge text="Si attiva con Lodgify" />}
+        </div>
+        {upcomingBookings.length > 0 ? (
+          <div className="space-y-3">
+            {upcomingBookings.slice(0, 5).map((b, i) => (
+              <div key={i} className="flex items-center justify-between py-3 border-b border-dark-700 last:border-0">
+                <div>
+                  <p className="font-sans text-white text-[15px]">{b.guest_name}</p>
+                  <p className="font-sans text-dark-200 text-[13px]">{new Date(b.checkin).toLocaleDateString('it-IT')} – {new Date(b.checkout).toLocaleDateString('it-IT')} · {b.source}</p>
                 </div>
-                <div className="flex justify-between items-center pb-4 border-b border-dark-700">
-                  <span className="font-sans text-[14px] text-dark-200">Spese Pulizia</span>
-                  <span className="font-serif text-[18px] text-dark-100">€ {Number(report.cleaning_fees).toLocaleString('it-IT')}</span>
-                </div>
-                <div className="flex justify-between items-center pb-4 border-b border-dark-700">
-                  <span className="font-sans text-[14px] text-dark-200">Commissioni VirtualBNB</span>
-                  <span className="font-serif text-[18px] text-red-400">- € {Number(report.virtualbnb_fees).toLocaleString('it-IT')}</span>
-                </div>
-                <div className="flex justify-between items-center pt-2">
-                  <span className="font-sans text-[14px] text-gold-500 uppercase tracking-wider">Netto al proprietario</span>
-                  <span className="font-serif text-[22px] text-gold-500">€ {Number(report.net_payout).toLocaleString('it-IT')}</span>
-                </div>
+                <p className="font-mono text-gold-400">€ {fmt(b.amount)}</p>
               </div>
-            ) : (
-              <p className="font-sans text-[14px] text-dark-200">Nessun rendiconto disponibile per questo mese.</p>
-            )}
+            ))}
           </div>
+        ) : (
+          <p className="font-sans text-dark-200 text-[14px]">
+            {lodgifyConnected
+              ? 'Nessuna prenotazione nei prossimi giorni.'
+              : 'Le prenotazioni compariranno qui automaticamente non appena colleghiamo il channel manager — nessuna azione richiesta da parte tua.'}
+          </p>
+        )}
+      </div>
+
+      {/* Occupazione + Spaccato Finanziario */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+        <div className={cardClass}>
+          <h3 className="font-serif text-[20px] text-white mb-6 flex items-center gap-3">📆 Occupazione</h3>
+          <p className="font-serif text-[40px] text-white mb-1">
+            {monthlyReport ? `${monthlyReport.occupancy_rate}%` : '--%'}
+          </p>
+          <p className="font-sans text-dark-200 text-[13px]">
+            {monthlyReport ? `Dato aggiornato sul mese di ${monthlyReport.month_year}.` : 'Nessun dato'}
+          </p>
         </div>
 
-      </motion.div>
+        <div className={cardClass}>
+          <h3 className="font-serif text-[20px] text-white mb-6 flex items-center gap-3">€ Spaccato Finanziario</h3>
+          {monthlyReport ? (
+            <div className="space-y-3">
+              <div className="flex justify-between font-sans text-[14px]">
+                <span className="text-dark-200">Revenue lordo</span>
+                <span className="text-white">€ {fmt(monthlyReport.gross_revenue)}</span>
+              </div>
+              <div className="flex justify-between font-sans text-[14px]">
+                <span className="text-dark-200">Commissione VirtualBNB</span>
+                <span className="text-white">€ {fmt(monthlyReport.virtualbnb_fees)}</span>
+              </div>
+              <div className="flex justify-between font-sans text-[14px]">
+                <span className="text-dark-200">Spese Pulizia</span>
+                <span className="text-white">€ {fmt(monthlyReport.cleaning_fees)}</span>
+              </div>
+              <div className="flex justify-between font-sans text-[14px] pt-2 border-t border-dark-700 font-medium">
+                <span className="text-gold-400 uppercase tracking-wider">Netto a te</span>
+                <span className="text-gold-400">€ {fmt(monthlyReport.net_payout)}</span>
+              </div>
+            </div>
+          ) : (
+            <p className="font-sans text-dark-200 text-[14px]">Nessun rendiconto disponibile per questo mese.</p>
+          )}
+        </div>
+      </div>
+
+      {/* Provenienza Prenotazioni + Pricing Ottimizzato */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+        <div className={cardClass}>
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="font-serif text-[20px] text-white">📊 Provenienza Prenotazioni</h3>
+            {lodgifyConnected ? <ConnectedBadge /> : <PendingBadge text="Si attiva con Lodgify" />}
+          </div>
+          {totalBookingsForSource > 0 ? (
+            <div className="space-y-3">
+              {Object.entries(sourceBreakdown).map(([source, count]) => (
+                <div key={source}>
+                  <div className="flex justify-between font-sans text-[13px] text-dark-200 mb-1">
+                    <span className="capitalize">{source === 'direct' ? 'Diretta (0% OTA)' : source}</span>
+                    <span>{Math.round((count / totalBookingsForSource) * 100)}%</span>
+                  </div>
+                  <div className="h-1.5 bg-dark-700 rounded-full overflow-hidden">
+                    <div className="h-full bg-gold-500" style={{ width: `${(count / totalBookingsForSource) * 100}%` }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="font-sans text-dark-200 text-[14px]">
+              Vedrai qui da dove arrivano i tuoi ospiti — incluso quanto risparmi con le prenotazioni dirette.
+            </p>
+          )}
+        </div>
+
+        <div className={cardClass}>
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="font-serif text-[20px] text-white">◎ Pricing Ottimizzato</h3>
+            {pricelabsConnected ? <ConnectedBadge /> : <PendingBadge text="Si attiva con PriceLabs" />}
+          </div>
+          {pricelabsConnected && monthlyReport?.avg_optimized_price ? (
+            <>
+              <p className="font-serif text-[40px] text-white mb-1">€ {fmt(monthlyReport.avg_optimized_price)}</p>
+              <p className="font-sans text-dark-200 text-[13px]">Prezzo medio a notte, aggiornato dinamicamente dall'AI.</p>
+            </>
+          ) : (
+            <p className="font-sans text-dark-200 text-[14px]">
+              Il pricing dinamico è gestito dal nostro algoritmo — qui vedrai un riepilogo di sintesi.
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Manuale Immobile per gli Ospiti */}
+      <div className={cardClass}>
+        <div className="mb-6">
+          <h3 className="font-serif text-[24px] text-white mb-2 flex items-center gap-3">
+            <FileText className="text-gold-500" size={24} /> Manuale dell'Immobile (Info Ospiti)
+          </h3>
+          <p className="font-sans text-[14px] text-dark-200">
+            Compila questi campi per fornire all'Assistente Virtuale tutte le informazioni necessarie per rispondere H24 alle domande dei tuoi ospiti durante il soggiorno.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Rete WiFi */}
+          <div className="bg-dark-900/50 p-5 rounded border border-dark-700">
+            <h4 className="flex items-center gap-2 font-sans text-white text-[15px] mb-3"><Wifi size={16} className="text-gold-500"/> Rete WiFi</h4>
+            <input type="text" name="wifi_network" value={guestGuide.wifi_network} onChange={handleGuideChange} placeholder="Nome Rete (SSID)" className="w-full bg-dark-800 border border-dark-700 focus:border-gold-500 text-white p-2 mb-2 outline-none text-[13px] rounded" />
+            <input type="text" name="wifi_password" value={guestGuide.wifi_password} onChange={handleGuideChange} placeholder="Password" className="w-full bg-dark-800 border border-dark-700 focus:border-gold-500 text-white p-2 outline-none text-[13px] rounded" />
+          </div>
+
+          {/* Regole della Casa */}
+          <div className="bg-dark-900/50 p-5 rounded border border-dark-700">
+            <h4 className="flex items-center gap-2 font-sans text-white text-[15px] mb-3"><AlertCircle size={16} className="text-gold-500"/> Regole della Casa</h4>
+            <textarea name="house_rules" value={guestGuide.house_rules} onChange={handleGuideChange} placeholder="Es. Non fumare, silenzio dopo le 22:00..." rows={3} className="w-full bg-dark-800 border border-dark-700 focus:border-gold-500 text-white p-3 outline-none text-[13px] rounded resize-none" />
+          </div>
+
+          {/* Istruzioni Check-in */}
+          <div className="bg-dark-900/50 p-5 rounded border border-dark-700">
+            <h4 className="flex items-center gap-2 font-sans text-white text-[15px] mb-3"><Key size={16} className="text-gold-500"/> Istruzioni Check-in</h4>
+            <textarea name="checkin_instructions" value={guestGuide.checkin_instructions} onChange={handleGuideChange} placeholder="Es. Il codice del tastierino è 1234. La cassetta delle chiavi si trova..." rows={3} className="w-full bg-dark-800 border border-dark-700 focus:border-gold-500 text-white p-3 outline-none text-[13px] rounded resize-none" />
+          </div>
+
+          {/* Rifiuti e Parcheggi */}
+          <div className="bg-dark-900/50 p-5 rounded border border-dark-700 space-y-4">
+            <div>
+              <h4 className="flex items-center gap-2 font-sans text-white text-[15px] mb-2"><Trash2 size={16} className="text-gold-500"/> Smaltimento Rifiuti</h4>
+              <input type="text" name="garbage_rules" value={guestGuide.garbage_rules} onChange={handleGuideChange} placeholder="Es. Umido lunedì, Plastica martedì..." className="w-full bg-dark-800 border border-dark-700 focus:border-gold-500 text-white p-2 outline-none text-[13px] rounded" />
+            </div>
+            <div>
+              <h4 className="flex items-center gap-2 font-sans text-white text-[15px] mb-2"><MapPin size={16} className="text-gold-500"/> Parcheggio</h4>
+              <input type="text" name="parking_rules" value={guestGuide.parking_rules} onChange={handleGuideChange} placeholder="Es. Strisce blu a pagamento nella via..." className="w-full bg-dark-800 border border-dark-700 focus:border-gold-500 text-white p-2 outline-none text-[13px] rounded" />
+            </div>
+          </div>
+        </div>
+        
+        <div className="mt-6 flex items-center justify-between border-t border-dark-700 pt-6">
+          <button onClick={saveGuestGuide} disabled={savingGuide || isPreview} className="bg-gold-500 text-black font-sans text-[13px] uppercase tracking-wider font-medium px-6 py-2.5 hover:bg-gold-400 transition-colors disabled:opacity-50 rounded">
+            {savingGuide ? 'Salvataggio...' : 'Salva Manuale'}
+          </button>
+          {guideMessage && (
+            <span className={`font-sans text-[13px] ${guideMessage.type === 'error' ? 'text-red-400' : 'text-green-400'}`}>
+              {guideMessage.text}
+            </span>
+          )}
+          {isPreview && <span className="font-sans text-[12px] text-dark-200">Salvataggio disabilitato in modalità anteprima</span>}
+        </div>
+      </div>
     </div>
   )
 }

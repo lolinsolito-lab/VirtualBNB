@@ -184,6 +184,125 @@ export default function SettingsTab() {
           </button>
         </div>
       </form>
+      
+      <div className="mt-8">
+        <IntegrationsPanel />
+      </div>
+    </div>
+  )
+}
+
+// ============================================================
+// SEZIONE "INTEGRAZIONI"
+// ============================================================
+
+const INTEGRATIONS = [
+  {
+    key: 'anthropic',
+    name: 'Anthropic (ARIA)',
+    envVar: 'ANTHROPIC_API_KEY',
+    description: 'Motore AI per le chat Admin e Owner.',
+  },
+  {
+    key: 'lodgify',
+    name: 'Lodgify',
+    envVar: 'LODGIFY_API_KEY',
+    description: 'Channel manager e motore di prenotazione diretta.',
+  },
+  {
+    key: 'pricelabs',
+    name: 'PriceLabs',
+    envVar: 'PRICELABS_API_KEY',
+    description: 'Pricing dinamico, sincronizzato con Lodgify.',
+  },
+  {
+    key: 'resend',
+    name: 'Resend',
+    envVar: 'RESEND_API_KEY',
+    description: 'Invio email (inviti, alert IBAN, documenti).',
+  },
+  {
+    key: 'upstash',
+    name: 'Upstash Redis',
+    envVar: 'UPSTASH_REDIS_REST_URL',
+    description: 'Rate limiting sulle API AI.',
+  },
+]
+
+function StatusPill({ status }) {
+  const styles = {
+    connected: 'text-gold-500 border-gold-500/30',
+    not_configured: 'text-dark-200/60 border-dark-700',
+    error: 'text-red-400 border-red-400/30',
+    checking: 'text-dark-200/60 border-dark-700',
+  }
+  const labels = {
+    connected: '✓ Connesso',
+    not_configured: 'Non configurato',
+    error: '⚠ Errore',
+    checking: 'Verifica in corso…',
+  }
+  return (
+    <span className={`font-mono text-[11px] tracking-[0.1em] uppercase border px-3 py-1.5 ${styles[status]}`}>
+      {labels[status]}
+    </span>
+  )
+}
+
+function IntegrationsPanel() {
+  const [statuses, setStatuses] = useState({}) 
+  const [checking, setChecking] = useState(false)
+
+  async function checkAll() {
+    setChecking(true)
+    const next = {}
+    for (const integ of INTEGRATIONS) {
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        const res = await fetch(`/api/checkIntegration?service=${integ.key}`, {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        })
+        const { connected, reason } = await res.json()
+        next[integ.key] = connected ? 'connected' : 'not_configured'
+        if (reason) console.log(`${integ.key}:`, reason) 
+      } catch {
+        next[integ.key] = 'error'
+      }
+    }
+    setStatuses(next)
+    setChecking(false)
+  }
+
+  useEffect(() => { checkAll() }, [])
+
+  return (
+    <div className="bg-dark-800 border border-dark-700 p-8 rounded-lg">
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="font-serif text-[22px] text-white">Integrazioni</h3>
+        <button
+          onClick={checkAll}
+          disabled={checking}
+          className="font-mono text-[11px] tracking-[0.1em] uppercase text-gold-500 border border-gold-500/30 px-4 py-2 hover:bg-gold-500/10 transition-colors disabled:opacity-50 cursor-pointer"
+        >
+          {checking ? 'Verifica…' : 'Ricontrolla stato'}
+        </button>
+      </div>
+      <p className="font-sans text-dark-200 text-[13px] mb-6">
+        Le chiavi si aggiungono in Vercel → Settings → Environment Variables, mai qui. Questo pannello mostra solo se sono configurate e funzionanti.
+      </p>
+
+      <div className="space-y-3">
+        {INTEGRATIONS.map((integ) => (
+          <div key={integ.key} className="flex items-center justify-between py-4 border-b border-dark-700 last:border-0">
+            <div>
+              <p className="font-sans text-white text-[15px]">{integ.name}</p>
+              <p className="font-sans text-dark-200 text-[12.5px]">{integ.description}</p>
+              <p className="font-mono text-dark-200/50 text-[11px] mt-1">{integ.envVar}</p>
+            </div>
+            <StatusPill status={statuses[integ.key] || 'checking'} />
+          </div>
+        ))}
+      </div>
     </div>
   )
 }

@@ -81,23 +81,14 @@ export default async function handler(req, res) {
     return res.status(429).json({ error: 'Troppe richieste. Attendi un minuto e riprova.' });
   }
 
-  // Auth check: verifica sessione Supabase
-  const authHeader = req.headers.authorization;
-  if (!authHeader?.startsWith('Bearer ')) {
-    return res.status(401).json({ error: 'Non autorizzato: token mancante.' });
+  // Auth check: verifica sessione Supabase e ruolo admin
+  let user;
+  try {
+    const { requireAdminAuth } = require('./lib/auth');
+    user = await requireAdminAuth(req);
+  } catch (error) {
+    return res.status(error.message.includes('ruolo') ? 403 : 401).json({ error: error.message });
   }
-
-  const jwt = authHeader.split(' ')[1];
-  if (jwt.length > 2048) return res.status(400).json({ error: 'Token non valido.' });
-
-  const supabase = createClient(process.env.VITE_SUPABASE_URL, process.env.VITE_SUPABASE_ANON_KEY);
-  const { data: { user }, error: authError } = await supabase.auth.getUser(jwt);
-  if (authError || !user) return res.status(401).json({ error: 'Token non valido.' });
-
-  // Verifica ruolo admin
-  const adminDb = createClient(process.env.VITE_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, { auth: { autoRefreshToken: false, persistSession: false } });
-  const { data: profile } = await adminDb.from('profiles').select('role').eq('id', user.id).single();
-  if (profile?.role !== 'admin') return res.status(403).json({ error: 'Accesso negato.' });
 
   // Sanitizzazione e validazione input
   const { message, history = [] } = req.body;
