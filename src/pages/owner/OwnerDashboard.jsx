@@ -30,12 +30,66 @@ function ConnectedBadge({ text = 'Live' }) {
 
 const fmt = (n) => Number(n).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 
+function SimpleCalendar({ bookings }) {
+  const today = new Date()
+  const year = today.getFullYear()
+  const month = today.getMonth()
+  
+  const daysInMonth = new Date(year, month + 1, 0).getDate()
+  const firstDay = new Date(year, month, 1).getDay()
+  const startOffset = firstDay === 0 ? 6 : firstDay - 1 // Lunedì come primo giorno
+  
+  const days = Array.from({ length: daysInMonth }, (_, i) => i + 1)
+  const blanks = Array.from({ length: startOffset }, (_, i) => i)
+
+  const isBooked = (day) => {
+    const date = new Date(year, month, day, 12, 0, 0)
+    return bookings.some(b => {
+      const checkin = new Date(b.checkin)
+      const checkout = new Date(b.checkout)
+      checkin.setHours(0,0,0,0)
+      checkout.setHours(23,59,59,999)
+      return date >= checkin && date <= checkout
+    })
+  }
+
+  const monthName = today.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' })
+
+  return (
+    <div className="w-full bg-dark-900/50 p-6 rounded border border-dark-700">
+      <div className="text-center font-serif text-[18px] text-white capitalize mb-6">{monthName}</div>
+      <div className="grid grid-cols-7 gap-2 text-center mb-4">
+        {['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'].map(d => (
+          <div key={d} className="font-mono text-[10px] tracking-widest uppercase text-dark-200">{d}</div>
+        ))}
+      </div>
+      <div className="grid grid-cols-7 gap-2">
+        {blanks.map(b => <div key={`blank-${b}`} className="aspect-square" />)}
+        {days.map(d => {
+          const booked = isBooked(d)
+          return (
+            <div key={d} className={`aspect-square flex flex-col items-center justify-center rounded text-[14px] font-sans border transition-colors ${booked ? 'bg-gold-500/10 text-gold-400 border-gold-500/30' : 'bg-dark-800 text-white/60 border-dark-700 hover:border-gold-500/50'}`}>
+              <span>{d}</span>
+              {booked && <div className="w-1.5 h-1.5 rounded-full bg-gold-500 mt-1" />}
+            </div>
+          )
+        })}
+      </div>
+      <div className="mt-6 flex items-center justify-center gap-4 font-sans text-[12px] text-dark-200">
+        <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-gold-500" /> Occupato</div>
+        <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full border border-dark-700" /> Libero</div>
+      </div>
+    </div>
+  )
+}
+
 export default function OwnerDashboard() {
   const [allProperties, setAllProperties] = useState([])
   const [property, setProperty] = useState(null)
   const [bookings, setBookings] = useState([])
   const [monthlyReport, setMonthlyReport] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [viewMode, setViewMode] = useState('list') // 'list' o 'calendar'
   
   // Guest Guide State
   const [guestGuide, setGuestGuide] = useState({
@@ -205,12 +259,31 @@ export default function OwnerDashboard() {
 
       {/* Prossime Prenotazioni */}
       <div className={`${cardClass} mb-8`}>
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="font-serif text-[20px] text-white flex items-center gap-3">📅 Prossime Prenotazioni</h3>
-          {lodgifyConnected ? <ConnectedBadge /> : <PendingBadge text="In attivazione" />}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+          <div className="flex items-center gap-4">
+            <h3 className="font-serif text-[20px] text-white flex items-center gap-3">📅 Prossime Prenotazioni</h3>
+            {lodgifyConnected ? <ConnectedBadge /> : <PendingBadge text="In attivazione" />}
+          </div>
+          <div className="flex bg-dark-900 border border-dark-700 rounded overflow-hidden p-1">
+            <button 
+              onClick={() => setViewMode('list')}
+              className={`px-4 py-1.5 font-sans text-[12px] uppercase tracking-wider transition-colors rounded ${viewMode === 'list' ? 'bg-dark-700 text-white' : 'text-dark-200 hover:text-white'}`}
+            >
+              Lista
+            </button>
+            <button 
+              onClick={() => setViewMode('calendar')}
+              className={`px-4 py-1.5 font-sans text-[12px] uppercase tracking-wider transition-colors rounded ${viewMode === 'calendar' ? 'bg-dark-700 text-white' : 'text-dark-200 hover:text-white'}`}
+            >
+              Calendario
+            </button>
+          </div>
         </div>
-        {upcomingBookings.length > 0 ? (
-          <div className="space-y-3">
+        {viewMode === 'calendar' ? (
+          <SimpleCalendar bookings={bookings} />
+        ) : (
+          upcomingBookings.length > 0 ? (
+            <div className="space-y-3">
             {upcomingBookings.slice(0, 5).map((b, i) => (
               <div key={i} className="flex items-center justify-between py-3 border-b border-dark-700 last:border-0">
                 <div>
