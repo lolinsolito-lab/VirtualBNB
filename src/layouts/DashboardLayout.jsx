@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, Users, Home, Settings, LogOut, Menu, X, FileText, Repeat } from 'lucide-react'
+import { LayoutDashboard, Users, Home, Settings, LogOut, Menu, X, FileText, Repeat, FolderOpen } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import AiChat from '../components/AiChat'
@@ -18,6 +18,7 @@ export default function DashboardLayout() {
     { icon: <Home size={20} />, label: 'Immobili', path: '/admin/properties' },
     { icon: <Users size={20} />, label: 'Proprietari', path: '/admin/owners' },
     { icon: <FileText size={20} />, label: 'Rendiconti', path: '/admin/finances' },
+    { icon: <FolderOpen size={20} />, label: 'Documenti', path: '/admin/documenti' },
     { icon: <Settings size={20} />, label: 'Impostazioni', path: '/admin/settings' },
   ] : [
     { icon: <LayoutDashboard size={20} />, label: 'Le mie proprietà', path: '/portal' },

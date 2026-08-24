@@ -11,6 +11,7 @@ import OverviewTab from './pages/admin/tabs/OverviewTab'
 import UsersTab from './pages/admin/tabs/UsersTab'
 import PropertiesTab from './pages/admin/tabs/PropertiesTab'
 import FinancesTab from './pages/admin/tabs/FinancesTab'
+import DocumentsTab from './pages/admin/tabs/DocumentsTab'
 
 export default function App() {
   return (
@@ -28,6 +29,7 @@ export default function App() {
           <Route path="/admin/owners" element={<UsersTab />} />
           <Route path="/admin/properties" element={<PropertiesTab />} />
           <Route path="/admin/finances" element={<FinancesTab />} />
+          <Route path="/admin/documenti" element={<DocumentsTab />} />
           <Route path="/admin/settings" element={<div className="p-10 text-white font-serif text-[24px]">Impostazioni (Coming Soon)</div>} />
           
           {/* Owner Portal Routes */}

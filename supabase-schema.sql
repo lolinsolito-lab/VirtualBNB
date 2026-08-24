@@ -69,3 +69,43 @@ ALTER TABLE leads ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Admin legge i leads" ON leads FOR SELECT 
 USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin'));
 CREATE POLICY "Chiunque può inserire leads" ON leads FOR INSERT WITH CHECK (true);
+
+-- 5. Configurazione Storage (Bucket documenti-legali)
+INSERT INTO storage.buckets (id, name, public) 
+VALUES ('documenti-legali', 'documenti-legali', false)
+ON CONFLICT (id) DO NOTHING;
+
+-- NOTA: Su Supabase, RLS su storage.objects è abilitato di default e la tabella 
+-- è di proprietà del sistema, per cui ALTER TABLE dà errore. Creiamo solo le policy.
+
+CREATE POLICY "Admin legge documenti-legali" ON storage.objects
+FOR SELECT USING (bucket_id = 'documenti-legali' AND is_admin());
+
+CREATE POLICY "Admin carica documenti-legali" ON storage.objects
+FOR INSERT WITH CHECK (bucket_id = 'documenti-legali' AND is_admin());
+
+CREATE POLICY "Admin aggiorna documenti-legali" ON storage.objects
+FOR UPDATE USING (bucket_id = 'documenti-legali' AND is_admin());
+
+CREATE POLICY "Admin elimina documenti-legali" ON storage.objects
+FOR DELETE USING (bucket_id = 'documenti-legali' AND is_admin());
+
+-- 6. Tabella Log Invio Documenti
+CREATE TABLE document_sends_log (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  destinatario_email TEXT NOT NULL,
+  documento_nome TEXT NOT NULL,
+  owner_profile_id UUID REFERENCES profiles(id), -- Nullabile, per lead non registrati
+  inviato_da UUID REFERENCES profiles(id) NOT NULL,
+  resend_message_id TEXT NOT NULL, -- ID univoco di Resend (es. eae07677-...)
+  data_invio TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW())
+);
+
+-- Sicurezza: Solo gli admin possono leggere e scrivere il log
+ALTER TABLE document_sends_log ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Admin legge document_sends_log" ON document_sends_log
+FOR SELECT USING (is_admin());
+
+CREATE POLICY "Admin inserisce in document_sends_log" ON document_sends_log
+FOR INSERT WITH CHECK (is_admin());
