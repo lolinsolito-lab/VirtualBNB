@@ -207,7 +207,7 @@ export default function OwnerDashboard() {
       <div className={`${cardClass} mb-8`}>
         <div className="flex items-center justify-between mb-6">
           <h3 className="font-serif text-[20px] text-white flex items-center gap-3">📅 Prossime Prenotazioni</h3>
-          {lodgifyConnected ? <ConnectedBadge /> : <PendingBadge text="Si attiva con Lodgify" />}
+          {lodgifyConnected ? <ConnectedBadge /> : <PendingBadge text="In attivazione" />}
         </div>
         {upcomingBookings.length > 0 ? (
           <div className="space-y-3">
@@ -274,7 +274,7 @@ export default function OwnerDashboard() {
         <div className={cardClass}>
           <div className="flex items-center justify-between mb-6">
             <h3 className="font-serif text-[20px] text-white">📊 Provenienza Prenotazioni</h3>
-            {lodgifyConnected ? <ConnectedBadge /> : <PendingBadge text="Si attiva con Lodgify" />}
+            {lodgifyConnected ? <ConnectedBadge /> : <PendingBadge text="In attivazione" />}
           </div>
           {totalBookingsForSource > 0 ? (
             <div className="space-y-3">
@@ -300,7 +300,7 @@ export default function OwnerDashboard() {
         <div className={cardClass}>
           <div className="flex items-center justify-between mb-6">
             <h3 className="font-serif text-[20px] text-white">◎ Pricing Ottimizzato</h3>
-            {pricelabsConnected ? <ConnectedBadge /> : <PendingBadge text="Si attiva con PriceLabs" />}
+            {pricelabsConnected ? <ConnectedBadge /> : <PendingBadge text="In elaborazione" />}
           </div>
           {pricelabsConnected && monthlyReport?.avg_optimized_price ? (
             <>
