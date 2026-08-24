@@ -281,9 +281,8 @@ export default function OwnerDashboard() {
         </div>
         {viewMode === 'calendar' ? (
           <SimpleCalendar bookings={bookings} />
-        ) : (
-          upcomingBookings.length > 0 ? (
-            <div className="space-y-3">
+        ) : upcomingBookings.length > 0 ? (
+          <div className="space-y-3">
             {upcomingBookings.slice(0, 5).map((b, i) => (
               <div key={i} className="flex items-center justify-between py-3 border-b border-dark-700 last:border-0">
                 <div>
