@@ -130,9 +130,11 @@ export default function OwnerDashboard() {
                 <CheckCircle size={16} /> {report?.status === 'paid' ? 'Bonifico inviato' : 'In attesa di calcolo fine mese'}
               </p>
             </div>
+            {/* Tasto PDF nascosto temporaneamente:
             <button className="font-sans text-[13px] font-medium tracking-[0.1em] uppercase bg-black text-white px-6 py-3 hover:bg-dark-800 transition-colors self-start md:self-auto disabled:opacity-50">
               Scarica Report PDF
             </button>
+            */}
           </div>
         </div>
 

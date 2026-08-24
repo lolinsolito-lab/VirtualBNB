@@ -1,4 +1,6 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom'
+import { useEffect } from 'react'
+import { supabase } from './lib/supabaseClient'
 import Landing from './pages/Landing'
 import Login from './pages/auth/Login'
 import ForgotPassword from './pages/auth/ForgotPassword'
@@ -13,9 +15,29 @@ import PropertiesTab from './pages/admin/tabs/PropertiesTab'
 import FinancesTab from './pages/admin/tabs/FinancesTab'
 import DocumentsTab from './pages/admin/tabs/DocumentsTab'
 
+function AuthListener() {
+  const navigate = useNavigate()
+  
+  useEffect(() => {
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      // Supabase tratta sia il recupero password che i Magic Link di invito come PASSWORD_RECOVERY
+      if (event === 'PASSWORD_RECOVERY') {
+        navigate('/update-password', { replace: true })
+      }
+    })
+    
+    return () => {
+      authListener.subscription.unsubscribe()
+    }
+  }, [navigate])
+  
+  return null
+}
+
 export default function App() {
   return (
     <Router>
+      <AuthListener />
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
