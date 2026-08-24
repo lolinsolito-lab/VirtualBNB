@@ -31,6 +31,7 @@ function ConnectedBadge({ text = 'Live' }) {
 const fmt = (n) => Number(n).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 
 export default function OwnerDashboard() {
+  const [allProperties, setAllProperties] = useState([])
   const [property, setProperty] = useState(null)
   const [bookings, setBookings] = useState([])
   const [monthlyReport, setMonthlyReport] = useState(null)
@@ -73,26 +74,36 @@ export default function OwnerDashboard() {
         }
       }
 
-      const { data: propData } = await supabase.from('properties').select('*').eq('owner_id', targetUserId).limit(1).single()
+      const { data: propData } = await supabase.from('properties').select('*').eq('owner_id', targetUserId).order('title')
 
-      if (propData) {
-        setProperty(propData)
-        if (propData.guest_guide) {
-          setGuestGuide({ ...guestGuide, ...propData.guest_guide })
-        }
-        
-        // Fetch real data
-        const { data: bData } = await supabase.from('bookings').select('*').eq('property_id', propData.id).order('checkin', { ascending: true })
-        if (bData) setBookings(bData)
-          
-        const { data: repData } = await supabase.from('monthly_reports').select('*').eq('property_id', propData.id).order('created_at', { ascending: false }).limit(1).maybeSingle()
-        if (repData) setMonthlyReport(repData)
+      if (propData && propData.length > 0) {
+        setAllProperties(propData)
+        await loadPropertyDetails(propData[0])
       }
       setLoading(false)
     }
 
     loadData()
   }, [previewOwnerId])
+
+  const loadPropertyDetails = async (prop) => {
+    setProperty(prop)
+    setGuestGuide({
+      wifi_network: '',
+      wifi_password: '',
+      checkin_instructions: '',
+      house_rules: '',
+      garbage_rules: '',
+      parking_rules: '',
+      ...(prop.guest_guide || {})
+    })
+    
+    const { data: bData } = await supabase.from('bookings').select('*').eq('property_id', prop.id).order('checkin', { ascending: true })
+    setBookings(bData || [])
+      
+    const { data: repData } = await supabase.from('monthly_reports').select('*').eq('property_id', prop.id).order('created_at', { ascending: false }).limit(1).maybeSingle()
+    setMonthlyReport(repData || null)
+  }
 
   const saveGuestGuide = async () => {
     setSavingGuide(true)
@@ -157,8 +168,21 @@ export default function OwnerDashboard() {
 
       {/* Header proprietà */}
       <div className="mb-10">
-        <h1 className="font-serif text-[36px] text-white mb-1">{property.title}</h1>
-        <p className="font-sans text-dark-200">{property.address} — {property.type}</p>
+        {allProperties.length > 1 ? (
+          <select 
+            className="font-serif text-[36px] text-white mb-1 bg-transparent border-b border-dark-700 outline-none cursor-pointer focus:border-gold-500 pb-1 appearance-none pr-8"
+            style={{ backgroundImage: 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23B8963E%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.5rem top 60%', backgroundSize: '0.65rem auto' }}
+            value={property.id}
+            onChange={(e) => loadPropertyDetails(allProperties.find(p => p.id === e.target.value))}
+          >
+            {allProperties.map(p => (
+              <option key={p.id} value={p.id} className="bg-dark-900 text-[20px] text-white">{p.title}</option>
+            ))}
+          </select>
+        ) : (
+          <h1 className="font-serif text-[36px] text-white mb-1">{property.title}</h1>
+        )}
+        <p className="font-sans text-dark-200 mt-2">{property.address} — {property.type}</p>
       </div>
 
       {/* Hero: Guadagno Netto */}
