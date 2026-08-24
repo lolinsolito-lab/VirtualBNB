@@ -10,9 +10,22 @@ export default function UpdatePassword() {
   const navigate = useNavigate()
 
   useEffect(() => {
+    // Controlla se c'è un errore nell'URL generato da Supabase (es. token scaduto o cliccato due volte)
+    const hash = window.location.hash
+    if (hash && hash.includes('error=')) {
+      const params = new URLSearchParams(hash.substring(1))
+      const errorDesc = params.get('error_description')
+      if (errorDesc) {
+        setError(errorDesc.replace(/\+/g, ' '))
+      } else {
+        setError('Il link è invalido o scaduto (forse lo hai già cliccato?). Fatti rimandare un invito.')
+      }
+    }
+
     // Check if user is actually in a recovery session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) {
+      // Se non c'è sessione e non c'è un token nell'URL in fase di caricamento, manda al login
+      if (!session && !hash.includes('access_token') && !hash.includes('error')) {
         navigate('/login')
       }
     })
