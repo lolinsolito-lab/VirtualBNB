@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { TrendingUp, Users, Home, Euro } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { supabase } from '../../../lib/supabaseClient'
 
 export default function OverviewTab() {
@@ -58,9 +59,9 @@ export default function OverviewTab() {
   if (loading) return <div className="p-10 text-white font-sans">Caricamento dati dal database...</div>
 
   const statCards = [
-    { label: 'Fatturato Registrato (Totale)', value: `€${stats.revenue.toLocaleString('it-IT')}`, icon: <Euro size={24} /> },
-    { label: 'Proprietà Attive', value: stats.properties.toString(), icon: <Home size={24} /> },
-    { label: 'Proprietari (Clienti)', value: stats.owners.toString(), icon: <Users size={24} /> },
+    { label: 'Fatturato Registrato (Totale)', value: `€${stats.revenue.toLocaleString('it-IT')}`, icon: <Euro size={24} />, link: '/admin/finances' },
+    { label: 'Proprietà Attive', value: stats.properties.toString(), icon: <Home size={24} />, link: '/admin/properties' },
+    { label: 'Proprietari (Clienti)', value: stats.owners.toString(), icon: <Users size={24} />, link: '/admin/owners' },
     { label: 'Occupazione Media', value: `${stats.avgOccupancy}%`, icon: <TrendingUp size={24} /> },
   ]
 
@@ -72,15 +73,27 @@ export default function OverviewTab() {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
         {statCards.map((stat, i) => (
-          <div key={i} className="bg-dark-800 border border-dark-700 p-6 rounded-lg">
-            <div className="flex justify-between items-start mb-4">
-              <div className="p-3 bg-dark-900 border border-dark-700 rounded-md text-gold-500">
-                {stat.icon}
+          stat.link ? (
+            <Link to={stat.link} key={i} className="bg-dark-800 border border-dark-700 p-6 rounded-lg hover:border-gold-500/50 transition-colors cursor-pointer group block">
+              <div className="flex justify-between items-start mb-4">
+                <div className="p-3 bg-dark-900 border border-dark-700 rounded-md text-gold-500 group-hover:bg-gold-500/10 transition-colors">
+                  {stat.icon}
+                </div>
               </div>
+              <p className="font-mono text-[12px] tracking-[0.1em] uppercase text-dark-200 mb-1">{stat.label}</p>
+              <p className="font-serif text-[28px] text-white">{stat.value}</p>
+            </Link>
+          ) : (
+            <div key={i} className="bg-dark-800 border border-dark-700 p-6 rounded-lg">
+              <div className="flex justify-between items-start mb-4">
+                <div className="p-3 bg-dark-900 border border-dark-700 rounded-md text-gold-500">
+                  {stat.icon}
+                </div>
+              </div>
+              <p className="font-mono text-[12px] tracking-[0.1em] uppercase text-dark-200 mb-1">{stat.label}</p>
+              <p className="font-serif text-[28px] text-white">{stat.value}</p>
             </div>
-            <p className="font-mono text-[12px] tracking-[0.1em] uppercase text-dark-200 mb-1">{stat.label}</p>
-            <p className="font-serif text-[28px] text-white">{stat.value}</p>
-          </div>
+          )
         ))}
       </div>
 

@@ -23,7 +23,7 @@ export default function UsersTab() {
     setLoading(true)
     const { data } = await supabase
       .from('profiles')
-      .select('*')
+      .select('*, properties(id)')
       .eq('role', 'owner')
       .order('created_at', { ascending: false })
     
@@ -166,6 +166,7 @@ export default function UsersTab() {
                   <th className="p-4 border-b border-dark-700">ID</th>
                   <th className="p-4 border-b border-dark-700">Nome</th>
                   <th className="p-4 border-b border-dark-700">Email</th>
+                  <th className="p-4 border-b border-dark-700">N. Immobili</th>
                   <th className="p-4 border-b border-dark-700">Data Registrazione</th>
                   <th className="p-4 border-b border-dark-700 text-right">Azioni</th>
                 </tr>
@@ -181,6 +182,7 @@ export default function UsersTab() {
                       <td className="p-4 font-mono text-[11px] text-dark-300">{u.id.substring(0,8)}...</td>
                       <td className="p-4">{u.full_name}</td>
                       <td className="p-4 text-dark-200 font-mono text-[12px]">{u.email || '-'}</td>
+                      <td className="p-4 text-gold-500 font-mono text-[12px] font-bold">{u.properties?.length || 0}</td>
                       <td className="p-4 text-dark-200">{new Date(u.created_at).toLocaleDateString('it-IT')}</td>
                       <td className="p-4 text-right">
                         <a 

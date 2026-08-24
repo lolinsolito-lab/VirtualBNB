@@ -74,7 +74,7 @@ export default function Login() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full bg-dark-900 border border-dark-700 focus:border-gold-500 text-white font-sans text-[15px] p-4 outline-none transition-colors"
-              placeholder="admin@virtualbnb.it"
+              placeholder="la-tua-email@virtualbnb.it"
               required
             />
           </div>
