@@ -32,6 +32,7 @@ export default async function handler(req, res) {
       type: 'invite',
       email: email,
       options: {
+        redirectTo: 'https://virtualbnb.it/update-password',
         data: {
           full_name: fullName || '',
           phone: phone || ''
