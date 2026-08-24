@@ -5,6 +5,7 @@ import CookieBanner from '../components/ui/CookieBanner'
 import GuestHero from '../components/guest/GuestHero'
 import GuestTrust from '../components/guest/GuestTrust'
 import GuestProperties from '../components/guest/GuestProperties'
+import GuestExperiences from '../components/guest/GuestExperiences'
 
 export default function GuestLanding() {
   useEffect(() => {
@@ -19,9 +20,10 @@ export default function GuestLanding() {
         <GuestHero />
         <GuestTrust />
         <GuestProperties />
+        <GuestExperiences />
       </main>
 
-      <Footer />
+      <Footer isGuest={true} />
       <CookieBanner />
     </div>
   )

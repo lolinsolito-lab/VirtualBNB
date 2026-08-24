@@ -119,17 +119,23 @@ const LEGAL = {
   },
 }
 
-export default function Footer() {
+export default function Footer({ isGuest = false }) {
   const [modal, setModal] = useState(null)
+  const currentYear = new Date().getFullYear()
 
-  // Ascolta eventi esterni per aprire il modal (es. dal CookieBanner)
+  const guestNavItems = [
+    { label: 'Esplora le Case', id: 'vetrina' },
+    { label: 'Esperienze', id: 'esperienze' }
+  ]
+  
+  const currentNavItems = isGuest ? guestNavItems : navItems
+
   useEffect(() => {
     const handleOpenModal = (e) => setModal(e.detail)
     window.addEventListener('open-legal-modal', handleOpenModal)
     return () => window.removeEventListener('open-legal-modal', handleOpenModal)
   }, [])
 
-  // Blocca lo scroll del body quando un modal è aperto
   useEffect(() => {
     if (modal) {
       document.body.style.overflow = 'hidden'
@@ -144,25 +150,60 @@ export default function Footer() {
   return (
     <>
       <footer className="bg-dark-900 border-t border-gold-500/12">
-        <div className="max-w-[1280px] mx-auto px-6 md:px-10 py-16 flex items-center justify-between flex-wrap gap-8">
-          {/* Logo */}
-          <div className="font-serif text-[20px] tracking-widest">
-            VIRTUAL<span className="text-gold-500">BNB</span>
+        <div className="max-w-[1280px] mx-auto px-6 md:px-10 py-16">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+            <div className="md:col-span-1">
+              <div className="font-serif text-[20px] tracking-widest mb-6">
+                VIRTUAL<span className="text-gold-500">BNB</span>
+              </div>
+            </div>
+
+            <div className="md:col-span-1">
+              <h4 className="font-serif text-[18px] text-white mb-6">VirtualBNB</h4>
+              <ul className="space-y-3">
+                {currentNavItems.map(item => (
+                  <li key={item.id}>
+                    <button onClick={() => scrollTo(item.id)} className="font-sans text-[14px] text-dark-200 hover:text-gold-500 transition-colors">
+                      {item.label}
+                    </button>
+                  </li>
+                ))}
+                {!isGuest && (
+                  <li>
+                    <a href="/login" className="font-sans text-[14px] text-dark-200 hover:text-gold-500 transition-colors">Owner Portal</a>
+                  </li>
+                )}
+              </ul>
+            </div>
+
+            <div className="md:col-span-1">
+              <h4 className="font-serif text-[18px] text-white mb-6">Contatti</h4>
+              <ul className="space-y-3">
+                <li>
+                  <a href={`mailto:${EMAIL_GDPR}`} className="font-sans text-[14px] text-dark-200 hover:text-gold-500 transition-colors">Email</a>
+                </li>
+                <li>
+                  <a href="https://wa.me/393275982855" target="_blank" rel="noopener noreferrer" className="font-sans text-[14px] text-dark-200 hover:text-gold-500 transition-colors">WhatsApp</a>
+                </li>
+                {!isGuest && (
+                  <li>
+                    <a href="https://calendly.com/virtualbnb/scoperta" target="_blank" rel="noopener noreferrer" className="font-sans text-[14px] text-dark-200 hover:text-gold-500 transition-colors">Prenota Call</a>
+                  </li>
+                )}
+              </ul>
+            </div>
           </div>
 
-          {/* Nav + Legal links */}
-          <div className="flex gap-6 md:gap-8 flex-wrap items-center">
-            {navItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => scrollTo(item.id)}
-                className="font-sans text-[13px] tracking-[0.08em] text-dark-200 hover:text-white transition-colors uppercase"
-              >
-                {item.label}
-              </button>
-            ))}
-            <span className="w-px h-4 bg-dark-700 hidden md:block" />
-            <div className="flex gap-6 w-full md:w-auto mt-4 md:mt-0">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6 pt-8 border-t border-dark-700">
+            <div className="text-dark-300 font-mono text-[11px] uppercase tracking-wider">
+              {isGuest ? (
+                <>© {currentYear} VirtualBNB. Tutti i diritti riservati. Prenota in totale sicurezza.</>
+              ) : (
+                <>© {currentYear} VirtualBNB by Insolito Experiences. P.IVA 14379200968.</>
+              )}
+            </div>
+            
+            <div className="flex gap-6">
               {[
                 { label: 'Privacy', key: 'privacy' },
                 { label: 'Termini', key: 'terms' },
@@ -171,17 +212,13 @@ export default function Footer() {
                 <button
                   key={item.key}
                   onClick={() => setModal(item.key)}
-                  className="font-sans text-[13px] tracking-[0.08em] text-dark-200 hover:text-white transition-colors uppercase"
+                  className="font-sans text-[12px] text-dark-300 hover:text-gold-500 transition-colors uppercase"
                 >
                   {item.label}
                 </button>
               ))}
             </div>
           </div>
-
-          {/* Legal info */}
-          <div className="font-sans text-[13px] text-dark-200 leading-relaxed text-left md:text-right w-full md:w-auto">
-            © 2026 VirtualBNB by Insolito Experiences<br />
             P.IVA IT14379200968 <br />
             PEC: virtualbnb@pec.it · Milano, Italia
           </div>
