@@ -19,7 +19,7 @@ const experiences = [
   {
     title: 'Arte & Musei',
     desc: 'Visite guidate private nei musei e siti storici più prestigiosi.',
-    image: 'https://images.unsplash.com/photo-1518998053401-878c73fd5fce?auto=format&fit=crop&q=80&w=800',
+    image: 'https://images.unsplash.com/photo-1544928147-79a2dbc1f389?auto=format&fit=crop&q=80&w=800',
   },
   {
     title: 'Sport & Natura',
@@ -27,8 +27,8 @@ const experiences = [
     image: 'https://images.unsplash.com/photo-1544256718-3bcf237f3974?auto=format&fit=crop&q=80&w=800',
   },
   {
-    title: 'SPA in Villa',
-    desc: 'Massaggi e percorsi benessere nel comfort della tua casa.',
+    title: 'Rituali Olistici',
+    desc: 'Sessioni private di yoga, sound healing e trattamenti di alto livello nella tua villa.',
     image: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&q=80&w=800',
   }
 ]

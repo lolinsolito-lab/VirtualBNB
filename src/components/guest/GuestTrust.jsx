@@ -9,8 +9,8 @@ const benefits = [
   },
   {
     icon: <Sparkles size={36} className="text-gold-500 mb-6" />,
-    title: 'Standard 5 Stelle',
-    desc: 'Lenzuola di alta gamma, kit cortesia premium e protocolli di pulizia alberghiera certificati per ogni soggiorno.'
+    title: 'Comfort Esclusivo',
+    desc: 'Lenzuola di alta gamma, kit cortesia artigianali e dotazioni da Boutique Hotel per garantirti un soggiorno senza compromessi.'
   },
   {
     icon: <Clock size={36} className="text-gold-500 mb-6" />,

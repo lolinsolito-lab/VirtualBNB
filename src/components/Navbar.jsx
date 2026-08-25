@@ -67,12 +67,6 @@ export default function Navbar({ isGuest = false }) {
               >
                 Cerca Casa
               </a>
-              <Link
-                to="/"
-                className="font-sans text-[11px] tracking-[0.12em] uppercase text-gold-500 hover:text-gold-400 transition-colors ml-4 hidden lg:block"
-              >
-                Proprietari?
-              </Link>
             </>
           ) : (
             <>
@@ -123,23 +117,6 @@ export default function Navbar({ isGuest = false }) {
               {link.label}
             </button>
           ))}
-          {isGuest ? (
-            <Link
-              to="/"
-              onClick={() => setMobileOpen(false)}
-              className="font-serif text-[28px] text-white hover:text-gold-400 transition-colors"
-            >
-              Area Proprietari
-            </Link>
-          ) : (
-            <Link
-              to="/ospiti"
-              onClick={() => setMobileOpen(false)}
-              className="font-serif text-[28px] text-white hover:text-gold-400 transition-colors"
-            >
-              Ospiti / Prenota
-            </Link>
-          )}
           {!isGuest && (
             <Link
               to="/login"
