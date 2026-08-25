@@ -361,6 +361,14 @@ export default function OwnerDashboard() {
                   </div>
                 </div>
               ))}
+              {sourceBreakdown['direct'] > 0 && (
+                <div className="mt-4 p-3 bg-gold-500/10 border border-gold-500/30 rounded-lg animate-fade-in">
+                  <p className="font-sans text-[12px] text-gold-400 leading-snug">
+                    <strong className="block mb-1">✨ Risparmio Diretto (50/50)</strong>
+                    Le prenotazioni dirette evitano le commissioni OTA. Dividiamo il risparmio netto (dopo i costi del motore di prenotazione) esattamente a metà: <span className="font-bold text-white">il 50% resta dritto nelle tue tasche.</span>
+                  </p>
+                </div>
+              )}
             </div>
           ) : (
             <p className="font-sans text-dark-200 text-[14px]">
