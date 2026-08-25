@@ -49,12 +49,14 @@ export default function Navbar({ isGuest = false }) {
 
         {/* Desktop CTAs */}
         <div className="flex items-center gap-3">
-          <Link
-            to="/login"
-            className="hidden md:block font-sans text-[12px] tracking-[0.12em] uppercase text-dark-200 hover:text-white transition-colors px-3 py-2"
-          >
-            Accedi
-          </Link>
+          {!isGuest && (
+            <Link
+              to="/login"
+              className="hidden md:block font-sans text-[12px] tracking-[0.12em] uppercase text-dark-200 hover:text-white transition-colors px-3 py-2"
+            >
+              Accedi
+            </Link>
+          )}
           {isGuest ? (
             <>
               <a
@@ -138,19 +140,23 @@ export default function Navbar({ isGuest = false }) {
               Ospiti / Prenota
             </Link>
           )}
-          <Link
-            to="/login"
-            onClick={() => setMobileOpen(false)}
-            className="font-sans text-[13px] tracking-[0.15em] uppercase text-dark-200 hover:text-white transition-colors mt-8"
-          >
-            Accedi
-          </Link>
-          <button
-            className="mt-2 font-sans text-[12px] tracking-[0.15em] uppercase px-10 py-4 border border-gold-500 text-gold-500 hover:bg-gold-500 hover:text-black transition-all duration-300"
-            onClick={() => { scrollTo('analisi'); setMobileOpen(false) }}
-          >
-            Analisi Gratuita
-          </button>
+          {!isGuest && (
+            <Link
+              to="/login"
+              onClick={() => setMobileOpen(false)}
+              className="font-sans text-[13px] tracking-[0.15em] uppercase text-dark-200 hover:text-white transition-colors mt-8"
+            >
+              Accedi
+            </Link>
+          )}
+          {!isGuest && (
+            <button
+              className="mt-2 font-sans text-[12px] tracking-[0.15em] uppercase px-10 py-4 border border-gold-500 text-gold-500 hover:bg-gold-500 hover:text-black transition-all duration-300"
+              onClick={() => { scrollTo('analisi'); setMobileOpen(false) }}
+            >
+              Analisi Gratuita
+            </button>
+          )}
         </div>
       )}
     </>

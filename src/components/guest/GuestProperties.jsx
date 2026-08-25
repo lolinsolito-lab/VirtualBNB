@@ -35,14 +35,14 @@ export default function GuestProperties() {
           </div>
         </div>
 
-        {/* CONTENITORE WIDGET LODGIFY */}
+        {/* CONTENITORE WIDGET BOOKING */}
         <div className="w-full min-h-[600px] bg-dark-800 border border-dark-700 rounded-lg p-8 flex flex-col items-center justify-center text-center">
           <div className="w-16 h-16 rounded-full bg-dark-700 flex items-center justify-center mb-6">
             <span className="text-[24px]">🏠</span>
           </div>
-          <h3 className="font-serif text-[24px] text-white mb-3">Lodgify Booking Widget</h3>
+          <h3 className="font-serif text-[24px] text-white mb-3">Motore di Prenotazione</h3>
           <p className="font-sans text-[15px] text-dark-200 max-w-md mx-auto mb-8">
-            Questa area è pronta per ospitare lo script di Lodgify. Incollando il codice fornito dal tuo account, appariranno qui la barra di ricerca, le case, i prezzi in tempo reale e il sistema di pagamento.
+            Il modulo di prenotazione in tempo reale sarà attivo a breve. Qui potrai inserire le tue date e completare la prenotazione in totale sicurezza.
           </p>
           
           {/* Placeholder visivo di come potrebbe apparire */}
