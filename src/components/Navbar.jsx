@@ -65,7 +65,7 @@ export default function Navbar({ isGuest = false }) {
                 rel="noopener noreferrer"
                 className="nav-cta"
               >
-                Cerca Casa
+                Prenota Ora
               </a>
             </>
           ) : (
