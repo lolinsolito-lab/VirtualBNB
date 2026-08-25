@@ -56,7 +56,7 @@ export default function GuestHero() {
           transition={{ duration: 1, delay: 0.4, ease: "easeOut" }}
           className="font-sans font-light text-[18px] md:text-[24px] text-white/90 max-w-3xl leading-relaxed mb-12 drop-shadow-lg"
         >
-          Prenotando dal sito ufficiale salti le commissioni dei portali (fino al 15% in meno). Pulizia garantita a 5 stelle e Concierge H24.
+          Prenotando dal sito ufficiale salti le commissioni dei portali (fino al 15% in meno). Comfort esclusivo e Assistente Digitale H24 a tua disposizione.
         </motion.p>
 
         <motion.div

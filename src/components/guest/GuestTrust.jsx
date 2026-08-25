@@ -14,8 +14,8 @@ const benefits = [
   },
   {
     icon: <Clock size={36} className="text-gold-500 mb-6" />,
-    title: 'Concierge H24',
-    desc: 'Il nostro team locale e il nostro Assistente IA sono a tua disposizione 24 ore su 24 per qualsiasi necessità.'
+    title: 'Assistente Digitale H24',
+    desc: 'Il nostro Assistente Virtuale risponde subito a ogni tua domanda, mentre il team locale interviene tempestivamente in caso di emergenza.'
   },
   {
     icon: <CalendarCheck size={36} className="text-gold-500 mb-6" />,
