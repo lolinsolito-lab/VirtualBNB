@@ -19,6 +19,7 @@ export default function DashboardLayout() {
     { icon: <Users size={20} />, label: 'Proprietari', path: '/admin/owners' },
     { icon: <FileText size={20} />, label: 'Rendiconti', path: '/admin/finances' },
     { icon: <FolderOpen size={20} />, label: 'Documenti', path: '/admin/documenti' },
+    { icon: <Settings size={20} />, label: 'Esperienze', path: '/admin/experiences' },
     { icon: <Settings size={20} />, label: 'Impostazioni', path: '/admin/settings' },
   ] : [
     { icon: <LayoutDashboard size={20} />, label: 'Le mie proprietà', path: '/portal' },

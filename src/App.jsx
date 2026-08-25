@@ -16,6 +16,7 @@ import PropertiesTab from './pages/admin/tabs/PropertiesTab'
 import FinancesTab from './pages/admin/tabs/FinancesTab'
 import DocumentsTab from './pages/admin/tabs/DocumentsTab'
 import SettingsTab from './pages/admin/tabs/SettingsTab'
+import ExperiencesTab from './pages/admin/tabs/ExperiencesTab'
 import OwnerSettingsTab from './pages/owner/tabs/OwnerSettingsTab'
 
 function AuthListener() {
@@ -56,6 +57,7 @@ export default function App() {
           <Route path="/admin/properties" element={<PropertiesTab />} />
           <Route path="/admin/finances" element={<FinancesTab />} />
           <Route path="/admin/documenti" element={<DocumentsTab />} />
+          <Route path="/admin/experiences" element={<ExperiencesTab />} />
           <Route path="/admin/settings" element={<SettingsTab />} />
           
           {/* Owner Portal Routes */}
